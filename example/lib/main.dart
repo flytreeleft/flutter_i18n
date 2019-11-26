@@ -20,13 +20,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:flutter_i18n/flutter_i18n.dart';
 
+final I18n i18n = I18n.build();
+
 void main() => runApp(I18nApp());
 
 class I18nApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      onGenerateTitle: (context) => 'Flutter I18n Example',
+      onGenerateTitle: (context) => i18n.of(context).lang('Flutter I18n Example'),
       supportedLocales: [
         const Locale('en'),
         const Locale('zh'),
@@ -36,7 +38,7 @@ class I18nApp extends StatelessWidget {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      home: HomePage(title: 'Flutter I18n Example'),
+      home: HomePage(title: i18n.of(context).lang('Flutter I18n Example')),
     );
   }
 }
