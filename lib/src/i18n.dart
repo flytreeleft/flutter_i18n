@@ -21,36 +21,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class I18n {
-  final Locale locale;
+  final String _namespace;
+  final String _module;
 
-  const I18n(this.locale);
+  const I18n({String namespace, String module})
+      : this._module = module ?? '_',
+        this._namespace = namespace ?? 'default';
 
   static _I18nDelegate delegate({String path: 'assets/i18n'}) {
     return _I18nDelegate(path: path);
   }
 
-  static I18n of(BuildContext context, {dynamic module, String namespace}) {
-    final type = module.runtimeType.toString();
-    return Localizations.of<I18n>(context, I18n);
+  static I18n build({String namespace, dynamic module}) {
+    final name = module is String ? module : module.runtimeType.toString();
+
+    return I18n(module: name, namespace: namespace);
   }
 
-  String lang(String text, {dynamic args, String annotation}) {
-    return '';
-  }
+  _I18nLang of(BuildContext context) {
+    _I18nContext i18nContext = Localizations.of<_I18nContext>(context, _I18nContext);
 
-  Future<bool> load() async {
-    // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-    return true;
+    return i18nContext._lang(namespace: this._namespace, module: this._module);
   }
 }
 
-class _I18nDelegate extends LocalizationsDelegate<I18n> {
-  final String path;
+class _I18nDelegate extends LocalizationsDelegate<_I18nContext> {
+  final String _path;
 
-  const _I18nDelegate({@required this.path});
+  const _I18nDelegate({@required String path}) : this._path = path;
 
   // Support all locale language
   @override
@@ -60,10 +58,44 @@ class _I18nDelegate extends LocalizationsDelegate<I18n> {
   bool shouldReload(_I18nDelegate old) => false;
 
   @override
-  Future<I18n> load(Locale locale) async {
-    I18n i18n = I18n(locale);
-    await i18n.load();
+  Future<_I18nContext> load(Locale locale) async {
+    await _I18nContext.load(this._path);
 
-    return i18n;
+    // TODO Cache _I18nContext
+
+    return _I18nContext(locale);
+  }
+}
+
+class _I18nContext {
+  final Locale _locale;
+
+  _I18nContext(this._locale);
+
+  _I18nLang _lang({String namespace, String module}) {
+    return _I18nLang(namespace: namespace, module: module, context: this);
+  }
+
+  static Future<bool> load(String path) async {
+    // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+    return true;
+  }
+}
+
+class _I18nLang {
+  final String _namespace;
+  final String _module;
+  final _I18nContext _context;
+
+  const _I18nLang({String namespace, String module, _I18nContext context})
+      : this._namespace = namespace,
+        this._module = module,
+        this._context = context;
+
+  String lang(String text, {dynamic args, String annotation}) {
+    return '';
   }
 }
