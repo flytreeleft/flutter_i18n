@@ -1,0 +1,20 @@
+name: flutter_i18n
+description: A flutter internationalization plugin.
+version: 0.1.0
+author: flytreeleft <flytreeleft@crazydan.org>
+homepage: https://github.com/flytreeleft/flutter_i18n
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # https://pub.dev/packages/test
+  test: 1.6.3
+
+flutter:
