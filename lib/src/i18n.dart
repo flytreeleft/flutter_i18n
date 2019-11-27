@@ -15,25 +15,29 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import './utils.dart';
+
+const _default_module = '_';
+const _default_namespace = 'default';
+const _default_base_path = 'assets/i18n';
 
 class I18n {
   final String _namespace;
   final String _module;
 
   const I18n({String namespace, String module})
-      : this._module = module ?? '_',
-        this._namespace = namespace ?? 'default';
+      : this._module = module ?? _default_module,
+        this._namespace = namespace ?? _default_namespace;
 
-  static _I18nDelegate delegate({String path: 'assets/i18n'}) {
-    return _I18nDelegate(path: path);
+  static _I18nDelegate delegate({String basePath}) {
+    return _I18nDelegate(basePath ?? _default_base_path);
   }
 
   static I18n build({String namespace, dynamic module}) {
-    final name = module is String ? module : module.runtimeType.toString();
+    final name = module == null || module is String ? module : module.toString();
 
     return I18n(module: name, namespace: namespace);
   }
@@ -46,9 +50,9 @@ class I18n {
 }
 
 class _I18nDelegate extends LocalizationsDelegate<_I18nContext> {
-  final String _path;
+  final String _basePath;
 
-  const _I18nDelegate({@required String path}) : this._path = path;
+  _I18nDelegate(String basePath) : this._basePath = basePath.replaceAll(RegExp(r'^/+|/+$'), '');
 
   // Support all locale language
   @override
@@ -59,16 +63,20 @@ class _I18nDelegate extends LocalizationsDelegate<_I18nContext> {
 
   @override
   Future<_I18nContext> load(Locale locale) async {
-    await _I18nContext.load(this._path);
+    // Assume that changing language isn't a high frequency action,
+    // so we just rebuild the _I18nContext to save the memory.
+    _I18nContext context = _I18nContext(locale);
 
-    // TODO Cache _I18nContext
+    await context.load(this._basePath);
 
-    return _I18nContext(locale);
+    return context;
   }
 }
 
 class _I18nContext {
   final Locale _locale;
+
+  Map<String, Map> _mapping = {};
 
   _I18nContext(this._locale);
 
@@ -76,10 +84,8 @@ class _I18nContext {
     return _I18nLang(namespace: namespace, module: module, context: this);
   }
 
-  static Future<bool> load(String path) async {
-    // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+  Future<bool> load(String basePath) async {
+    this._mapping = await loadI18nResources(this._locale, 'AssetManifest.json', basePath);
 
     return true;
   }
@@ -96,6 +102,13 @@ class _I18nLang {
         this._context = context;
 
   String lang(String text, {dynamic args, String annotation}) {
-    return '';
+    final String ns = this._namespace + '/' + this._module;
+    final Map message = this._context._mapping[ns][text];
+
+    if (message != null && message[this._context._locale]) {
+      text = message[this._context._locale];
+    }
+
+    return text;
   }
 }
