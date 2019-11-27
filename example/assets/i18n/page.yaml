@@ -1,2 +1,7 @@
 i18n:
   _:
+  HomePage:
+    - _: Change Language
+      zh: 切换语言
+    - _: This is a text
+      zh: 这是一段文本

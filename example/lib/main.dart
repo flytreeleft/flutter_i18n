@@ -20,7 +20,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:flutter_i18n/flutter_i18n.dart';
 
-final I18n i18n = I18n.build();
+import './page/home_page.dart';
+
+final I18n _i18n = I18n.build();
 
 void main() => runApp(I18nApp());
 
@@ -28,7 +30,7 @@ class I18nApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      onGenerateTitle: (context) => i18n.of(context).lang('Flutter I18n Example'),
+      locale: const Locale('zh'),
       supportedLocales: [
         const Locale('en'),
         const Locale('zh'),
@@ -38,46 +40,8 @@ class I18nApp extends StatelessWidget {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      home: HomePage(title: i18n.of(context).lang('Flutter I18n Example')),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  final String title;
-
-  HomePage({Key key, this.title}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  void _changeLanguage() {
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(this.widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'This is a text',
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _changeLanguage,
-        tooltip: 'Change Language',
-        child: Icon(Icons.flag),
-      ),
+      onGenerateTitle: (context) => _i18n.of(context).lang('Flutter I18n Example'),
+      home: HomePage(onGenerateTitle: (context) => _i18n.of(context).lang('Flutter I18n Example')),
     );
   }
 }

@@ -2,8 +2,3 @@ i18n:
   _:
     - _: Flutter I18n Example
       zh: Flutter I18n功能演示
-  HomePage:
-    - _: Change Language
-      zh: 切换语言
-    - _: This is a text
-      zh: 这是一段文本
