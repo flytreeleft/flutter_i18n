@@ -23,13 +23,24 @@ import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 
 List<String> _parseLocalCodes(Locale locale) {
-  return [
-    locale.languageCode,
-    locale.languageCode + '_' + locale.countryCode,
-    locale.languageCode + '-' + locale.countryCode,
-    locale.languageCode + '_' + locale.scriptCode + '_' + locale.countryCode,
-    locale.languageCode + '-' + locale.scriptCode + '-' + locale.countryCode,
-  ];
+  List<String> codes = [locale.languageCode];
+
+  if (locale.countryCode != null) {
+    codes.addAll([locale.languageCode + '_' + locale.countryCode, locale.languageCode + '-' + locale.countryCode]);
+  }
+
+  if (locale.scriptCode != null) {
+    codes.addAll([locale.languageCode + '_' + locale.scriptCode, locale.languageCode + '-' + locale.scriptCode]);
+  }
+
+  if (locale.countryCode != null && locale.scriptCode != null) {
+    codes.addAll([
+      locale.languageCode + '_' + locale.scriptCode + '_' + locale.countryCode,
+      locale.languageCode + '-' + locale.scriptCode + '-' + locale.countryCode
+    ]);
+  }
+
+  return codes;
 }
 
 Map<String, Map> _parseI18nYaml(String yaml, String topNamespace, Locale locale) {
@@ -41,7 +52,7 @@ Map<String, Map> _parseI18nYaml(String yaml, String topNamespace, Locale locale)
     String namespace = topNamespace + '/' + module;
     Map<String, Map> messageMap = {};
 
-    for (Map message in mapping[module]) {
+    for (Map message in (mapping[module] ?? [])) {
       String defaultText = '';
       Map<Locale, String> langTextMap = {};
 
@@ -79,8 +90,6 @@ Future<Map<String, Map>> loadI18nResources(Locale locale, String manifestPath, S
 
     resources.addAll(_parseI18nYaml(yaml, namespace, locale));
   }
-
-  print(json.encode(resources));
 
   return resources;
 }

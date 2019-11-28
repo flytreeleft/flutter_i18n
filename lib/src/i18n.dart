@@ -105,7 +105,7 @@ class _I18nLang {
     final String ns = this._namespace + '/' + this._module;
     final Map message = this._context._mapping[ns][text];
 
-    if (message != null && message[this._context._locale]) {
+    if (message != null && message[this._context._locale] != null) {
       text = message[this._context._locale];
     }
 
