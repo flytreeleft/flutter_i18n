@@ -18,9 +18,9 @@ i18n:
     - _: This is another text
       zh: 这是另一段文本
     - _: This is a text
-        # 通过指定annotation（标注）来区分内容相同但对应语言的消息内容不同的文本
-        annotation: different-meaning
       zh: 这是一段文本（但意义不同）
+      # 通过指定annotation（标注）来区分内容相同但对应语言的消息内容不同的文本
+      annotation: different-meaning
     # 带参数的国际化消息
     - _: Hello, ${name.en}!
       zh: 您好，${name.zh}！
