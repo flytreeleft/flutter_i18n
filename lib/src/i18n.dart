@@ -18,11 +18,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import './utils.dart';
+import './i18n_resource.dart';
 
 const _default_module = '_';
 const _default_namespace = 'default';
 const _default_base_path = 'assets/i18n';
+const _default_manifest_path = 'AssetManifest.json';
 
 class I18n {
   final String _namespace;
@@ -32,8 +33,8 @@ class I18n {
       : this._module = module ?? _default_module,
         this._namespace = namespace ?? _default_namespace;
 
-  static _I18nDelegate delegate({String basePath}) {
-    return _I18nDelegate(basePath ?? _default_base_path);
+  static _I18nDelegate delegate({String basePath, String manifestPath}) {
+    return _I18nDelegate(basePath ?? _default_base_path, manifestPath ?? _default_manifest_path);
   }
 
   static I18n build({String namespace, dynamic module}) {
@@ -43,16 +44,19 @@ class I18n {
   }
 
   _I18nLang of(BuildContext context) {
-    _I18nContext i18nContext = Localizations.of<_I18nContext>(context, _I18nContext);
+    _I18nLangContext langContext = Localizations.of<_I18nLangContext>(context, _I18nLangContext);
 
-    return i18nContext._lang(namespace: this._namespace, module: this._module);
+    return langContext._lang(namespace: this._namespace, module: this._module);
   }
 }
 
-class _I18nDelegate extends LocalizationsDelegate<_I18nContext> {
+class _I18nDelegate extends LocalizationsDelegate<_I18nLangContext> {
   final String _basePath;
+  final String _manifestPath;
 
-  _I18nDelegate(String basePath) : this._basePath = basePath.replaceAll(RegExp(r'^/+|/+$'), '');
+  _I18nDelegate(String basePath, String manifestPath)
+      : this._basePath = basePath.replaceAll(RegExp(r'^/+|/+$'), ''),
+        this._manifestPath = manifestPath;
 
   // Support all locale language
   @override
@@ -62,30 +66,30 @@ class _I18nDelegate extends LocalizationsDelegate<_I18nContext> {
   bool shouldReload(_I18nDelegate old) => false;
 
   @override
-  Future<_I18nContext> load(Locale locale) async {
+  Future<_I18nLangContext> load(Locale locale) async {
     // Assume that changing language isn't a high frequency action,
     // so we just rebuild the _I18nContext to save the memory.
-    _I18nContext context = _I18nContext(locale);
+    _I18nLangContext langContext = _I18nLangContext(locale);
 
-    await context.load(this._basePath);
+    await langContext.load(this._basePath, this._manifestPath);
 
-    return context;
+    return langContext;
   }
 }
 
-class _I18nContext {
+class _I18nLangContext {
   final Locale _locale;
 
-  Map<String, Map> _mapping = {};
+  I18nResource _resource;
 
-  _I18nContext(this._locale);
+  _I18nLangContext(this._locale);
 
   _I18nLang _lang({String namespace, String module}) {
-    return _I18nLang(namespace: namespace, module: module, context: this);
+    return _I18nLang(context: this, namespace: namespace, module: module);
   }
 
-  Future<bool> load(String basePath) async {
-    this._mapping = await loadI18nResources(this._locale, 'AssetManifest.json', basePath);
+  Future<bool> load(String basePath, String manifestPath) async {
+    this._resource = await I18nResource.load(this._locale, basePath: basePath, manifestPath: manifestPath);
 
     return true;
   }
@@ -94,21 +98,16 @@ class _I18nContext {
 class _I18nLang {
   final String _namespace;
   final String _module;
-  final _I18nContext _context;
+  final _I18nLangContext _context;
 
-  const _I18nLang({String namespace, String module, _I18nContext context})
+  const _I18nLang({_I18nLangContext context, String namespace, String module})
       : this._namespace = namespace,
         this._module = module,
         this._context = context;
 
   String lang(String text, {dynamic args, String annotation}) {
-    final String ns = this._namespace + '/' + this._module;
-    final Map message = this._context._mapping[ns][text];
+    final I18nMessage message = this._context._resource.get(namespace: this._namespace, module: this._module);
 
-    if (message != null && message[this._context._locale] != null) {
-      text = message[this._context._locale];
-    }
-
-    return text;
+    return message.parse(text, args: args, annotation: annotation);
   }
 }
