@@ -16,24 +16,32 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
+import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
+
 import 'package:flutter_i18n/flutter_i18n.dart';
+
+import '../app_state.dart';
+import '../locale_icon.dart';
+import '../locale_controller.dart';
 
 final I18n _i18n = I18n.build(module: HomePage, namespace: 'page');
 
 class HomePage extends StatefulWidget {
   final String title;
   final Function onGenerateTitle;
+  final AppState appState;
+  final LocaleController localeController;
 
-  HomePage({Key key, this.title, this.onGenerateTitle}) : super(key: key);
+  HomePage({Key key, @required this.localeController, this.title, this.onGenerateTitle, this.appState})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  void _changeLanguage() {
-    setState(() {});
-  }
+  bool _isShowDial = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +59,70 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _changeLanguage,
-        tooltip: _i18n.of(context).lang('Change Language'),
-        child: Icon(Icons.flag),
+      floatingActionButton: this.createFloatingActionButton(context),
+    );
+  }
+
+  void _changeLocale(Locale locale) {
+    this._isShowDial = false;
+    if (this.widget.localeController.value == locale) {
+      setState(() {});
+    } else {
+      this.widget.localeController.value = locale;
+    }
+  }
+
+  Widget createFloatingActionButton(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    // https://pub.dev/packages/flutter_arc_speed_dial#example
+    return SpeedDialMenuButton(
+      isShowSpeedDial: _isShowDial,
+      isMainFABMini: false,
+      isSpeedDialFABsMini: true,
+      paddingBtwSpeedDialButton: 30.0,
+      updateSpeedDialStatus: (isShow) {
+        setState(() {
+          this._isShowDial = isShow;
+        });
+      },
+      mainMenuFloatingActionButton: MainMenuFloatingActionButton(
+        mini: false,
+        child: this.createLocaleWidget(this.widget.appState.locale),
+        onPressed: () {},
+        closeMenuChild: Icon(Icons.close),
+        closeMenuForegroundColor: Colors.white,
+        closeMenuBackgroundColor: Colors.red,
       ),
+      floatingActionButtonWidgetChildren: this
+          .widget
+          .appState
+          .supportedLocales
+          .map<FloatingActionButton>((locale) => FloatingActionButton(
+                mini: false,
+                child: this.createLocaleWidget(locale),
+                onPressed: () => this._changeLocale(locale),
+                backgroundColor: theme.primaryColor,
+              ))
+          .toList(),
+    );
+  }
+
+  Widget createLocaleWidget(Locale locale) {
+    final LocaleIcon icon = LocaleIcons.get(locale);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        icon.img,
+        Text(
+          icon.text,
+          style: TextStyle(
+            fontSize: 6,
+          ),
+        ),
+      ],
     );
   }
 }
