@@ -31,7 +31,7 @@ class _I18nMessage {
   const _I18nMessage({String defaultText, String annotation, String localeText})
       : this._defaultText = defaultText,
         this._annotation = annotation,
-        this._localeText = localeText;
+        this._localeText = localeText == '' ? null : localeText;
 }
 
 class I18nMessage {
@@ -147,9 +147,9 @@ Map<String, Map<String, _I18nMessage>> _parseMessageModule(List<String> localeCo
     for (var messageNode in messageNodes) {
       assert(messageNode is Map, 'The message node should be a map, but got "$messageNode"');
 
+      String localeText;
       String defaultText = '';
       String annotation = '';
-      String localeText = '';
       for (String messageNodeKey in messageNode.keys) {
         String text = (messageNode[messageNodeKey] ?? '').trim();
 
