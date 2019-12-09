@@ -113,7 +113,7 @@ Future<Map<String, String>> _loadLocalResources(String basePath, String manifest
 }
 
 Future<Map<String, String>> _loadRemoteResources(String basePath, String manifestPath) async {
-  // TODO 支持加载URL资源
+  // TODO Loading remote manifest which contains an array json string
 
   return {};
 }

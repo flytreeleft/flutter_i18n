@@ -37,7 +37,8 @@ class I18n {
     return _I18nDelegate(basePath ?? _default_base_path, manifestPath ?? _default_manifest_path);
   }
 
-  static I18n build({String namespace, dynamic module}) {
+  static I18n build({String package, String namespace, dynamic module}) {
+    // TODO Support 'package' for a Flutter library: try to load the i18n message resources from 'packages/<lib_name>/assets/i18n' first
     final name = module == null || module is String ? module : module.toString();
 
     return I18n(module: name, namespace: namespace);
@@ -67,6 +68,7 @@ class _I18nDelegate extends LocalizationsDelegate<_I18nLangContext> {
 
   @override
   Future<_I18nLangContext> load(Locale locale) async {
+    // TODO Load and cache all language messages
     // Assume that changing language isn't a high frequency action,
     // so we just rebuild the _I18nContext to save the memory.
     _I18nLangContext langContext = _I18nLangContext(locale);
@@ -105,7 +107,8 @@ class _I18nLang {
         this._module = module,
         this._context = context;
 
-  String lang(String text, {dynamic args, String annotation}) {
+  String lang(String text, {dynamic args, String annotation, lang}) {
+    // TODO Call `lang.toString()`
     final I18nMessage message = this._context._resource.get(namespace: this._namespace, module: this._module);
 
     return message.parse(text, args: args, annotation: annotation);
