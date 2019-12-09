@@ -16,12 +16,17 @@ A simple and powerful Flutter i18n plugin.
   the different packages and modules.
 - The same content of a i18n message can be translated to different content
   for the same another language via specifying a different `annotation`.
+- Be compatible with the way to use property key actually.
 - [**WIP**] Use [mustache](https://mustache.github.io) as the i18n message template engine,
   so the i18n message can be controlled freely.
 - [**WIP**] Support to be used in the Flutter libraries.
 - [**WIP**] Support to load the remote i18n message resources.
 - [**WIP**] Dynamic change language when needed, e.g.
   `i18n.lang('This an english text, but it will be translated to Chinese', lang: 'zh_Hans')`.
+
+## Have a Glance
+
+<!-- 放上代码截图与本地化效果截图 -->
 
 ## Getting Started
 
@@ -79,12 +84,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
   Widget build(BuildContext context) {
     final title = _i18n.of(context).lang('Flutter I18n Example');
 
-    return /*...*/;  
+    return /*...*/;
   }
 // ...
 ```
 
-Actually, that's all you need to have to do. That means there is no need to define or 
+Actually, that's all you need to have to do. That means there is no need to define or
 specify the i18n message resources. Your app will work well and it will show the text
 which is used as the first parameter of `i18n.lang(...)`.
 
@@ -135,7 +140,7 @@ final I18n _i18n = I18n.build(module: HomePage, namespace: 'page/home');
 - A full `namespace` should contain the subdirectory path and the resource file name,
   if the resource file is named as `default.yaml`, the `namespace` should not contain
   the resource file name any more.
-  
+
 ## APIs
 
 ### `_I18nDelegate I18n.delegate({String basePath, String manifestPath})`
@@ -169,7 +174,7 @@ Create a `I18n` instance to load and translate the messages which are defined in
   Default is `default` which means the i18n messages are defined in the `${basePath}/default.yaml`.
 - `module`: [String] A module name or a class name to distinguish the i18n messages
   between the different widgets. Default is `_` (a underline which represents the default module).
-  
+
 For example, if you want to use `I18n` in the widget `Calculator` for the library
 [flutter_calculator](https://github.com/flytreeleft/flutter_calculator)
 and define its i18n messages in `assets/i18n/main/calculator.yaml`, you need to create `I18n` like:
