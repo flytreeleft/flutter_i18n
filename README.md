@@ -53,7 +53,41 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 final I18n _i18n = I18n.build();
 ```
 
-- Init the localization delegate for `I18n` in the root widget `MaterialApp`:
+- Use `_i18n` anywhere you can get `BuildContext` directly or indirectly:
+
+```dart
+// ...
+  @override
+  Widget build(BuildContext context) {
+    final title = _i18n.of(context).lang('Flutter I18n Example');
+
+    return /*...*/;
+  }
+// ...
+```
+
+Actually, that's all you need to have to do. That means there is no need to define or
+specify the i18n message resources. Your app will work well and it will show the text
+which is used as the first parameter of `i18n.lang(...)`.
+
+If you want to support another language for facing other country's people.
+Just put your i18n message resource files into the directory `assets/i18n/`
+(which is called the `basePath` to load i18n resource files) in your app project
+and declare the i18n message [assets](https://flutter.dev/docs/development/ui/assets-and-images)
+in your `pubspec.yaml`:
+
+```yaml
+# ...
+flutter:
+  # ...
+  assets:
+    - assets/i18n/default.yaml
+    - assets/i18n/page.yaml
+    # Or just specify the i18n directory (needs to end with `/`)
+    #- assets/i18n/
+```
+
+Then, initialize the localization delegate for `I18n` in the root widget `MaterialApp`:
 
 ```dart
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -79,29 +113,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
   }
 // ...
 ```
-
-- Use `_i18n` anywhere you can get `BuildContext` directly or indirectly:
-
-```dart
-// ...
-  @override
-  Widget build(BuildContext context) {
-    final title = _i18n.of(context).lang('Flutter I18n Example');
-
-    return /*...*/;
-  }
-// ...
-```
-
-Actually, that's all you need to have to do. That means there is no need to define or
-specify the i18n message resources. Your app will work well and it will show the text
-which is used as the first parameter of `i18n.lang(...)`.
-
-If you want to support another language for facing other country's people.
-Just put your i18n message resource files into the directory `assets/i18n`
-(which is called the `basePath` to load i18n resource files) in your app project
-and declare the i18n message [assets](https://flutter.dev/docs/development/ui/assets-and-images)
-in your `pubspec.yaml`.
 
 The default i18n message resource file should be named as `default.yaml`,
 and define i18n message as following:
@@ -223,3 +234,4 @@ String msg = _i18n.of(context).lang('This is a text');
 - [Internation­alizing Flutter apps](https://flutter.dev/docs/development/accessibility-and-localization/internationalization)
 - [Flutter Localization the Easy Way – Internationalization with JSON](https://resocoder.com/2019/06/01/flutter-localization-the-easy-way-internationalization-with-json/)
 - [Flutter — Localization: step by step](https://proandroiddev.com/flutter-localization-step-by-step-30f95d06018d)
+- [Managing Locale in Flutter](https://medium.com/saugo360/managing-locale-in-flutter-7693a9d4d6ac)
