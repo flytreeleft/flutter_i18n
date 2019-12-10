@@ -3,7 +3,11 @@ Flutter I18n Plugin
 
 A simple and powerful Flutter i18n plugin.
 
-> Let's say **Bye Bye** to the property key of i18n message.
+> Let's say **Bye Bye** to the **Property Key**.
+>
+> 让我们和**Property Key**说再见！
+>
+> 讓我們和**Property Key**說再見！
 
 ## Features
 
