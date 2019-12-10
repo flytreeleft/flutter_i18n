@@ -17,6 +17,8 @@ dev_dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  # https://pub.dev/packages/devicelocale
+  devicelocale: ^0.2.0
   # https://pub.dev/packages/intl
   # https://api.flutter.dev/flutter/intl/intl-library.html
   intl: ^0.15.8
@@ -31,3 +33,5 @@ flutter:
   assets:
     - assets/i18n/default.yaml
     - assets/i18n/page.yaml
+    # Or just specify the i18n directory (needs to end with `/`)
+    #- assets/i18n/
