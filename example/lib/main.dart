@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:devicelocale/devicelocale.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 
 import './app_state.dart';
@@ -30,7 +31,7 @@ final I18n _i18n = I18n.build();
 void main() => runApp(I18nApp());
 
 class I18nApp extends StatefulWidget {
-  final AppState appState = AppState(locale: const Locale('zh'), supportedLocales: [
+  final AppState appState = AppState(supportedLocales: [
     // https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes
     const Locale('en'),
     const Locale('en', 'US'),
@@ -51,8 +52,11 @@ class _I18nAppState extends State<I18nApp> {
   void initState() {
     super.initState();
 
-    this._localeController.value = this.widget.appState.locale;
     this._localeController.addListener(this._doChangeLocale);
+
+    this.getSystemLocale().then((Locale locale) {
+      this._localeController.value = locale;
+    });
   }
 
   @override
@@ -64,6 +68,10 @@ class _I18nAppState extends State<I18nApp> {
 
   @override
   Widget build(BuildContext context) {
+    if (this.widget.appState.locale == null) {
+      return CircularProgressIndicator();
+    }
+
     return MaterialApp(
       locale: this.widget.appState.locale,
       supportedLocales: this.widget.appState.supportedLocales,
@@ -79,6 +87,19 @@ class _I18nAppState extends State<I18nApp> {
         onGenerateTitle: (context) => _i18n.of(context).lang('Flutter I18n Example'),
       ),
     );
+  }
+
+  // https://medium.com/saugo360/managing-locale-in-flutter-7693a9d4d6ac
+  Future<Locale> getSystemLocale() async {
+    String locale = await Devicelocale.currentLocale;
+    List<String> localeCodes = locale.split(RegExp(r'-|_'));
+
+    if (localeCodes.length == 1) {
+      return Locale(localeCodes[0]);
+    } else if (localeCodes.length == 3) {
+      return Locale.fromSubtags(languageCode: localeCodes[0], scriptCode: localeCodes[1], countryCode: localeCodes[2]);
+    }
+    return Locale(localeCodes[0], localeCodes[1]);
   }
 
   void _doChangeLocale() {

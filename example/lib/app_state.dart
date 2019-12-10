@@ -16,13 +16,11 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
-
 class AppState {
   Locale _locale;
   List<Locale> _supportedLocales;
 
-  AppState({@required Locale locale, List<Locale> supportedLocales})
+  AppState({Locale locale, List<Locale> supportedLocales})
       : this._locale = locale,
         this._supportedLocales = supportedLocales;
 
