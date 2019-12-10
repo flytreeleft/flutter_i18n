@@ -9,4 +9,5 @@ i18n:
       en_US: This is a text (en_US)
       en_GB: This is a text (en_GB)
       zh: 这是一段文本
-      zh_Hant: 這是一段文本
+      zh_Hans: 这是一段文本 (简体)
+      zh_Hant: 這是一段文本 (繁體)

@@ -1,7 +1,8 @@
 i18n:
   _:
     - _: Flutter I18n Example
-      en_US: Flutter I18n Example (US)
-      en_GB: Flutter I18n Example (GB)
+      en_US: Flutter I18n Example (en_US)
+      en_GB: Flutter I18n Example (en_GB)
       zh: Flutter I18n功能演示
-      zh_Hant: Flutter I18n功能演示
+      zh_Hans: Flutter I18n功能演示 (简体)
+      zh_Hant: Flutter I18n功能演示 (繁體)
