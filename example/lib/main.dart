@@ -22,9 +22,9 @@ import 'package:devicelocale/devicelocale.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 
 import './app_state.dart';
-import './page/home_page.dart';
-
 import './locale_controller.dart';
+
+import './main_page.dart';
 
 final I18n _i18n = I18n.build();
 
@@ -81,7 +81,7 @@ class _I18nAppState extends State<I18nApp> {
         GlobalWidgetsLocalizations.delegate,
       ],
       onGenerateTitle: (context) => _i18n.of(context).lang('Flutter I18n Example'),
-      home: HomePage(
+      home: MainPage(
         localeController: this._localeController,
         appState: this.widget.appState,
         onGenerateTitle: (context) => _i18n.of(context).lang('Flutter I18n Example'),

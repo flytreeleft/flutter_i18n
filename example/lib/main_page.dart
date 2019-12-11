@@ -21,26 +21,27 @@ import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
 
 import 'package:flutter_i18n/flutter_i18n.dart';
 
-import '../app_state.dart';
-import '../locale_icon.dart';
-import '../locale_controller.dart';
+import './app_state.dart';
+import './locale_icon.dart';
+import './locale_controller.dart';
+import './page/i18n_example.dart';
 
-final I18n _i18n = I18n.build(module: HomePage, namespace: 'page');
+final I18n _i18n = I18n.build(namespace: 'page');
 
-class HomePage extends StatefulWidget {
+class MainPage extends StatefulWidget {
   final String title;
   final Function onGenerateTitle;
   final AppState appState;
   final LocaleController localeController;
 
-  HomePage({Key key, @required this.localeController, this.title, this.onGenerateTitle, this.appState})
+  MainPage({Key key, @required this.localeController, this.title, this.onGenerateTitle, this.appState})
       : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _MainPageState createState() => _MainPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainPageState extends State<MainPage> {
   bool _isShowDial = false;
 
   @override
@@ -50,14 +51,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(this.widget.onGenerateTitle != null ? this.widget.onGenerateTitle(context) : this.widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              _i18n.of(context).lang('This is a text'),
-            ),
-          ],
-        ),
+        child: I18nExamplePage(),
       ),
       floatingActionButton: this.createFloatingActionButton(context),
     );
@@ -88,6 +82,7 @@ class _HomePageState extends State<HomePage> {
       },
       mainMenuFloatingActionButton: MainMenuFloatingActionButton(
         mini: false,
+        tooltip: _i18n.of(context).lang('Change Language'),
         child: this.createLocaleWidget(this.widget.appState.locale),
         onPressed: () {},
         closeMenuChild: Icon(Icons.close),
