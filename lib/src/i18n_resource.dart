@@ -103,7 +103,11 @@ Future<Map<String, String>> _loadLocalResources(String basePath, String manifest
   final Map<String, String> resources = {};
 
   for (String resourcePath in resourcePaths) {
-    final String namespace = resourcePath.substring(basePath.length + 1).replaceAll(RegExp(r'\.[^.]+$'), '');
+    // Remove '/default' from subdirectory path
+    final String namespace = resourcePath
+        .substring(basePath.length + 1)
+        .replaceAll(RegExp(r'\.[^.]+$'), '')
+        .replaceAll(RegExp(r'/default$'), '');
     final String yaml = await rootBundle.loadString(resourcePath);
 
     resources[namespace] = yaml;
