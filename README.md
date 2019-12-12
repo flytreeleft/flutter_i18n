@@ -221,9 +221,9 @@ String msg = _i18n.of(context).lang('This is a text');
 
 - [flutter_i18n_example](./example/)
 
-| Messages | Code | Demo |
-| :--- | :---- | :---: |
-| ![](./docs/images/demo-i18n-messages.png) | ![](./docs/images/demo-i18n-code.png) | ![](./docs/images/demo.gif) |
+| Messages + Code | Demo |
+| :--- | :---: |
+| ![](./docs/images/demo-i18n-messages.png) <br> ![](./docs/images/demo-i18n-code.png) | ![](./docs/images/demo.gif) |
 
 <!--
 [Making animated GIFs of Flutter apps](https://github.com/flutter/flutter/wiki/Making-animated-GIFs-of-Flutter-apps):
