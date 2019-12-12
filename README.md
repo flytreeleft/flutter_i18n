@@ -221,6 +221,19 @@ String msg = _i18n.of(context).lang('This is a text');
 
 - [flutter_i18n_example](./example/)
 
+| Messages | Code | Demo |
+| :--- | :---- | :---: |
+| ![]{(./docs/images/demo-i18n-messages.png) | ![]{(./docs/images/demo-i18n-cod.png) | ![](./docs/images/demo.gif) |
+
+<!--
+[Making animated GIFs of Flutter apps](https://github.com/flutter/flutter/wiki/Making-animated-GIFs-of-Flutter-apps):
+- Launch app in release mode: `flutter run --release`
+- Record video: `adb shell screenrecord /sdcard/recording.mp4`
+- Interact with app. Terminate the recording with `CTRL+c`
+- Pull the recording to local: `adb pull /sdcard/recording.mp4 .`
+- Go to http://ezgif.com/video-to-gif and convert the recording to GIF
+-->
+
 ## License
 
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
