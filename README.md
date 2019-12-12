@@ -18,8 +18,8 @@ A simple and powerful Flutter i18n plugin.
 - Use YAML as the message resource file instead of JSON or Properties file.
 - Use `namespace` and `module` to distinguish the i18n messages which are in
   the different packages and modules.
-- The same content of a i18n message can be translated to different content
-  for the same another language via specifying a different `annotation`.
+- The same content of a i18n message can be converted to a different translation
+  with a `annotation`.
 - Be compatible with the way to use property key actually.
 - [**WIP**] Use [mustache](https://mustache.github.io) as the i18n message template engine,
   so the i18n message can be controlled freely.
@@ -28,9 +28,22 @@ A simple and powerful Flutter i18n plugin.
 - [**WIP**] Dynamic change language when needed, e.g.
   `i18n.lang('This an english text, but it will be translated to Chinese', lang: 'zh_Hans')`.
 
-## Have a Glance
+## Demo
 
-<!-- 放上代码截图与本地化效果截图 -->
+- [flutter_i18n_example](./example/)
+
+| Messages + Code | Demo |
+| :--- | :---: |
+| ![](./docs/images/demo-i18n-messages.png) <br> ![](./docs/images/demo-i18n-code.png) | ![](./docs/images/demo.gif) |
+
+<!--
+[Making animated GIFs of Flutter apps](https://github.com/flutter/flutter/wiki/Making-animated-GIFs-of-Flutter-apps):
+- Launch app in release mode: `flutter run --release`
+- Record video: `adb shell screenrecord /sdcard/recording.mp4`
+- Interact with app. Terminate the recording with `CTRL+c`
+- Pull the recording to local: `adb pull /sdcard/recording.mp4 .`
+- Go to http://ezgif.com/video-to-gif and convert the recording to GIF
+-->
 
 ## Getting Started
 
@@ -156,6 +169,10 @@ final I18n _i18n = I18n.build(module: HomePage, namespace: 'page/home');
   if the resource file is named as `default.yaml`, the `namespace` should not contain
   the resource file name any more.
 
+## Cases
+
+<!-- 放上代码截图与本地化效果截图 -->
+
 ## APIs
 
 ### `_I18nDelegate I18n.delegate({String basePath, String manifestPath})`
@@ -216,23 +233,6 @@ String msg = _i18n.of(context).lang('This is a text');
   (using [mustache](https://mustache.github.io)).
 - `lang`: [String|Locale] The language which the text will be translated to. If not specified this,
   the `text` will be translated to the app's locale language.
-
-## Examples
-
-- [flutter_i18n_example](./example/)
-
-| Messages + Code | Demo |
-| :--- | :---: |
-| ![](./docs/images/demo-i18n-messages.png) <br> ![](./docs/images/demo-i18n-code.png) | ![](./docs/images/demo.gif) |
-
-<!--
-[Making animated GIFs of Flutter apps](https://github.com/flutter/flutter/wiki/Making-animated-GIFs-of-Flutter-apps):
-- Launch app in release mode: `flutter run --release`
-- Record video: `adb shell screenrecord /sdcard/recording.mp4`
-- Interact with app. Terminate the recording with `CTRL+c`
-- Pull the recording to local: `adb pull /sdcard/recording.mp4 .`
-- Go to http://ezgif.com/video-to-gif and convert the recording to GIF
--->
 
 ## License
 
