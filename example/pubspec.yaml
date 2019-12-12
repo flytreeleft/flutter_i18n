@@ -19,13 +19,18 @@ dev_dependencies:
     sdk: flutter
   # https://pub.dev/packages/devicelocale
   devicelocale: ^0.2.0
-  # https://pub.dev/packages/intl
-  # https://api.flutter.dev/flutter/intl/intl-library.html
-  intl: ^0.15.8
   # https://pub.dev/packages/flutter_arc_speed_dial
   flutter_arc_speed_dial: ^1.0.2
   # https://pub.dev/packages/country_icons
   country_icons: ^1.1.1
+  # https://pub.dev/packages/flutter_markdown
+  # Note: use `any` to prevent the error `requires SDK version <2.0.0, version solving failed`
+  ## https://github.com/flutter/flutter/issues/21421#issuecomment-526292491
+  #flutter_markdown: any
+  # https://pub.dev/packages/flutter_html
+  #flutter_html: ^0.11.0
+  # https://pub.dev/packages/flutter_highlight
+  #flutter_highlight: ^0.5.0
 
 flutter:
   uses-material-design: true
