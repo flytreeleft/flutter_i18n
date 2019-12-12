@@ -10,9 +10,20 @@ i18n:
     - _: This is a text
       en_US: This is a text (en_US)
       en_GB: This is a text (en_GB)
-      zh: 这是一段简单的文本
-      zh_Hans: 这是一段简单的文本 (简体)
-      zh_Hant: 這是一段簡單的文本 (繁體)
-  I18nExampleSpecialPage:
-    - _: This is a text
-      zh: 这是一段演示特殊用法的文本
+      zh: 这是一段文本
+      zh_Hans: 这是一段文本 (简体)
+      zh_Hant: 這是一段文本 (繁體)
+    - _: Hello, {{ name.en }}!
+      en_US: Hello, {{ name.en }}! (en_US)
+      en_GB: Hello, {{ name.en }}! (en_GB)
+      zh: 您好，{{ name.zh }}！
+      zh_Hans: 您好，{{ name.zh }}！(简体)
+      zh_Hant: 您好，{{ name.zh }}！(繁體)
+  special:
+    I18nExampleSpecialPage:
+      - _: This is a text for special example
+        en_US: This is a text for special example (en_US)
+        en_GB: This is a text for special example (en_GB)
+        zh: 这是一段演示特殊用法的文本
+        zh_Hans: 这是一段演示特殊用法的文本 (简体)
+        zh_Hant: 這是一段演示特殊用法的文本 (繁體)

@@ -22,7 +22,9 @@ import './i18n_example_basic.dart';
 import './i18n_example_advance.dart';
 import './i18n_example_special.dart';
 
-final I18n _i18n = I18n.build(namespace: 'example');
+final I18n _i18n = I18n.build(
+  namespace: 'example',
+);
 
 class I18nExamplePage extends StatelessWidget {
   @override
@@ -58,7 +60,7 @@ class I18nExamplePage extends StatelessWidget {
 
   Widget createTabPage(BuildContext context, WidgetBuilder builder) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,

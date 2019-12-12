@@ -18,14 +18,21 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_i18n/flutter_i18n.dart';
 
-final I18n _i18n = I18n.build(module: I18nExampleSpecialPage, namespace: 'example');
+final I18n _i18n = I18n.build(
+  module: I18nExampleSpecialPage,
+  namespace: 'example/special',
+);
 
 class I18nExampleSpecialPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      // - i18n.lang('This an english text, but it will be translated to Chinese', lang: 'zh_Hans')
+      // - compatible with property key
       children: <Widget>[
-        Text(_i18n.of(context).lang('This is a text')),
+        Text(
+          _i18n.of(context).lang('This is a text for special example'),
+        ),
       ],
     );
   }

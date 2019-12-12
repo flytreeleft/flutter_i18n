@@ -18,14 +18,20 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_i18n/flutter_i18n.dart';
 
-final I18n _i18n = I18n.build(namespace: 'example/advance');
+final I18n _i18n = I18n.build(
+  namespace: 'example/advance',
+);
 
 class I18nExampleAdvancePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      // - specifying a different translation with `annotation`
+      // - load the remote i18n message resources: call I18nDelegate and create I18nContext
       children: <Widget>[
-        Text(_i18n.of(context).lang('This is a text')),
+        Text(
+          _i18n.of(context).lang('This is a text for advance example'),
+        ),
       ],
     );
   }
