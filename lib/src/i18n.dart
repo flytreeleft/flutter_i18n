@@ -47,7 +47,7 @@ class I18n {
   _I18nLang of(BuildContext context) {
     _I18nLangContext langContext = Localizations.of<_I18nLangContext>(context, _I18nLangContext);
 
-    return langContext._lang(namespace: this._namespace, module: this._module);
+    return langContext.module(namespace: this._namespace, module: this._module);
   }
 }
 
@@ -86,7 +86,7 @@ class _I18nLangContext {
 
   _I18nLangContext(this._locale);
 
-  _I18nLang _lang({String namespace, String module}) {
+  _I18nLang module({String namespace, String module}) {
     return _I18nLang(context: this, namespace: namespace, module: module);
   }
 
