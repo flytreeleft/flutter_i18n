@@ -1,8 +1,22 @@
 i18n:
   _:
-    - _: This is a text for advance example
-      en_US: This is a text for advance example (en_US)
-      en_GB: This is a text for advance example (en_GB)
-      zh: 这是一段演示高级用法的文本
-      zh_Hans: 这是一段演示高级用法的文本 (简体)
-      zh_Hant: 這是一段演示高級用法的文本 (繁體)
+    - _: This is a text
+      en_US: This is a text (en_US)
+      en_GB: This is a text (en_GB)
+      zh: 这是一段文本
+      zh_Hans: 这是一段文本 (简体)
+      zh_Hant: 這是一段文本 (繁體)
+    - _: This is a text
+      en: This is another text (en)
+      en_US: This is another text (en_US)
+      en_GB: This is another text (en_GB)
+      zh: 这是另一段文字
+      zh_Hans: 这是另一段文字 (简体)
+      zh_Hant: 這是另一段文字 (繁體)
+      annotation: another
+    - _: This is a text from remote
+      en_US: This is a text from remote (en_US)
+      en_GB: This is a text from remote (en_GB)
+      zh: 这是一段来自远端服务的文本
+      zh_Hans: 这是一段来自远端服务的文本 (简体)
+      zh_Hant: 這是一段來自遠端服務的文本 (繁體)

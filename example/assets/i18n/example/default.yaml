@@ -21,9 +21,16 @@ i18n:
       zh_Hant: 您好，{{ name.zh }}！(繁體)
   special:
     I18nExampleSpecialPage:
-      - _: This is a text for special example
-        en_US: This is a text for special example (en_US)
-        en_GB: This is a text for special example (en_GB)
-        zh: 这是一段演示特殊用法的文本
-        zh_Hans: 这是一段演示特殊用法的文本 (简体)
-        zh_Hant: 這是一段演示特殊用法的文本 (繁體)
+      - _: This an english text, but it will be translated to Chinese
+        en_US: This an english text, but it will be translated to Chinese (en_US)
+        en_GB: This an english text, but it will be translated to Chinese (en_GB)
+        zh: 这本应该是一段英文文本，但却会被转译为中文
+        zh_Hans: 这本应该是一段英文文本，但却会被转译为中文 (简体)
+        zh_Hant: 這本應該是一段英文文本，但卻會被轉譯為中文 (繁體)
+      - _: "this.is.a.text.with.property.key"
+        en: This is a text mapping by a property key (en)
+        en_US: This is a text mapping by a property key (en_US)
+        en_GB: This is a text mapping by a property key (en_GB)
+        zh: 这是一段通过Property Key映射到的文本
+        zh_Hans: 这是一段通过Property Key映射到的文本 (简体)
+        zh_Hant: 這是一段通過Property Key映射到的文本 (繁體)
