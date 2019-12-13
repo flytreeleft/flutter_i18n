@@ -28,7 +28,6 @@ class I18nExampleBasicPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      //
       children: <Widget>[
         const Text(
           '''
