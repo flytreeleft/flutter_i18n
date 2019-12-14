@@ -30,8 +30,8 @@ class I18n {
   final String _module;
 
   const I18n({String namespace, String module})
-      : this._module = module ?? _default_module,
-        this._namespace = namespace ?? _default_namespace;
+      : this._module = module,
+        this._namespace = namespace;
 
   static _I18nDelegate delegate({String basePath, String manifestPath}) {
     return _I18nDelegate(basePath ?? _default_base_path, manifestPath ?? _default_manifest_path);
@@ -103,8 +103,8 @@ class _I18nLang {
   final _I18nLangContext _context;
 
   const _I18nLang({_I18nLangContext context, String namespace, String module})
-      : this._namespace = namespace,
-        this._module = module,
+      : this._namespace = namespace ?? _default_namespace,
+        this._module = module ?? _default_module,
         this._context = context;
 
   String lang(String text, {dynamic args, String annotation, lang}) {

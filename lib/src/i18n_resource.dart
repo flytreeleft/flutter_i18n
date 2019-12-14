@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'package:http/http.dart' as http;
 import 'package:reflected_mustache/mustache.dart';
 
 import 'package:yaml/yaml.dart';
@@ -87,7 +88,13 @@ class I18nResource {
     Map<String, String> resourceMap = {};
 
     if (_regexUrlMatch.hasMatch(basePath)) {
-      resourceMap = await _loadRemoteResources(basePath, manifestPath);
+      // TODO cache into local when loading successfully, otherwise, load the existing resources from the cache.
+      try {
+        resourceMap = await _loadRemoteResources(basePath, manifestPath);
+      } catch (e) {
+        print(e);
+        throw e;
+      }
     } else {
       resourceMap = await _loadLocalResources(basePath, manifestPath);
     }
@@ -120,6 +127,7 @@ Future<Map<String, String>> _loadLocalResources(String basePath, String manifest
         .substring(basePath.length + 1)
         .replaceAll(_regexFileSuffixMatch, '')
         .replaceAll(_regexDefaultPathEndingMatch, '');
+
     final String yaml = await rootBundle.loadString(resourcePath);
 
     resources[namespace] = yaml;
@@ -129,15 +137,32 @@ Future<Map<String, String>> _loadLocalResources(String basePath, String manifest
 }
 
 Future<Map<String, String>> _loadRemoteResources(String basePath, String manifestPath) async {
-  // TODO Loading remote manifest which contains an array json string
+  final String manifestUrl = '$basePath/$manifestPath';
+  final String manifestContent = await http.get(manifestUrl).then((response) => response.body);
+  final List<dynamic> resourcePaths = json.decode(manifestContent);
 
-  return {};
+  final Map<String, String> resources = {};
+
+  for (String resourcePath in resourcePaths) {
+    // Remove '/default' from subdirectory path
+    final String namespace =
+        resourcePath.replaceAll(_regexFileSuffixMatch, '').replaceAll(_regexDefaultPathEndingMatch, '');
+
+    final String resourceUrl = '$basePath/$resourcePath';
+    final String yaml = await http.get(resourceUrl).then((response) => response.body);
+
+    resources[namespace] = yaml;
+  }
+
+  return resources;
 }
 
 Map<String, Map<String, _I18nMessage>> _parseMessageYaml(Locale locale, String namespace, String yaml) {
   final i18nNode = (loadYaml(yaml) ?? {})['i18n'] ?? {};
-  assert(i18nNode is Map,
-      'The root node - i18n (in "$namespace.yaml") should be a map, but got "${i18nNode.runtimeType}".');
+  assert(
+    i18nNode is Map,
+    'The root node - i18n (in "$namespace.yaml") should be a map, but got "${i18nNode.runtimeType}".',
+  );
 
   final List<String> matchingLocales = _parseLocalCodes(locale);
 
