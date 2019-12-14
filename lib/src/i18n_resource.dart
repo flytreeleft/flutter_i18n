@@ -21,7 +21,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'package:reflected_mustache/mustache.dart';
+
 import 'package:yaml/yaml.dart';
+
+final RegExp _regexTemplateMatch = RegExp(r'\{\{[^\{\}]+\}\}', multiLine: true);
+final RegExp _regexUrlMatch = RegExp(r'^http(s)?://[^/\\]+');
+final RegExp _regexFileSuffixMatch = RegExp(r'\.[^.]+$');
+final RegExp _regexDefaultPathEndingMatch = RegExp(r'/default$');
 
 class _I18nMessage {
   final String _defaultText;
@@ -47,9 +54,13 @@ class I18nMessage {
       text = this._message[messageKey]._localeText ?? this._message[messageKey]._defaultText;
     }
 
-    // TODO Parse text
+    if (!text.contains(_regexTemplateMatch)) {
+      return text;
+    }
 
-    return text;
+    Template template = Template(text);
+
+    return template.renderString(args ?? {});
   }
 
   static String key(_I18nMessage message) {
@@ -75,7 +86,7 @@ class I18nResource {
   static Future<I18nResource> load(Locale locale, {@required String basePath, @required String manifestPath}) async {
     Map<String, String> resourceMap = {};
 
-    if (RegExp(r'^http(s)?://[^/\\]+').hasMatch(basePath)) {
+    if (_regexUrlMatch.hasMatch(basePath)) {
       resourceMap = await _loadRemoteResources(basePath, manifestPath);
     } else {
       resourceMap = await _loadLocalResources(basePath, manifestPath);
@@ -107,8 +118,8 @@ Future<Map<String, String>> _loadLocalResources(String basePath, String manifest
     // Remove '/default' from subdirectory path
     final String namespace = resourcePath
         .substring(basePath.length + 1)
-        .replaceAll(RegExp(r'\.[^.]+$'), '')
-        .replaceAll(RegExp(r'/default$'), '');
+        .replaceAll(_regexFileSuffixMatch, '')
+        .replaceAll(_regexDefaultPathEndingMatch, '');
     final String yaml = await rootBundle.loadString(resourcePath);
 
     resources[namespace] = yaml;
@@ -175,7 +186,9 @@ Map<String, Map<String, _I18nMessage>> _parseMessageModule(List<String> localeCo
       String messageKey = I18nMessage.key(message);
 
       assert(
-          messages[messageKey] == null, 'The following message was already defined in "$namespace":\n    $defaultText');
+        messages[messageKey] == null,
+        'The following message was already defined in "$namespace":\n    $defaultText',
+      );
 
       messages[messageKey] = message;
     }
