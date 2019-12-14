@@ -21,8 +21,8 @@ A simple and powerful Flutter i18n plugin.
 - The same content of a i18n message can be converted to a different translation
   with a `annotation`.
 - Be compatible with the way to use property key actually.
-- [**WIP**] Use [mustache](https://mustache.github.io) as the i18n message template engine,
-  so the i18n message can be controlled freely.
+- Use [reflected_mustache](https://github.com/MikeMitterer/reflected_mustache)
+  as the i18n message template engine, so the i18n message can be controlled freely.
 - [**WIP**] Support to be used in the Flutter libraries.
 - [**WIP**] Support to load the remote i18n message resources.
 - [**WIP**] Dynamic change language when needed, e.g.
