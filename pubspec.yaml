@@ -13,7 +13,12 @@ dependencies:
   # https://pub.dev/packages/yaml
   yaml: ^2.2.0
   # https://pub.dev/packages/mustache
-  mustache: ^1.1.1
+  ## Note: using mustache will cause error:
+  ##   import of dart:mirrors is not supported in the current Dart runtime
+  ## so replace it with reflected_mustache
+  #mustache: ^1.1.1
+  # https://pub.dev/packages/reflected_mustache
+  reflected_mustache: ^1.0.11
 
 dev_dependencies:
   flutter_test:
