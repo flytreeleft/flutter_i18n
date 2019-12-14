@@ -2,10 +2,13 @@ i18n:
   _:
     - _: Basic
       zh: 基础
+      zh_Hant: 基礎
     - _: Advance
       zh: 高级
+      zh_Hant: 高級
     - _: Special
       zh: 特殊
+      zh_Hant: 特殊
   I18nExampleBasicPage:
     - _: This is a text
       en_US: This is a text (en_US)
