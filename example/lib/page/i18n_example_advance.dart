@@ -88,7 +88,9 @@ class I18nExampleAdvancePage extends StatelessWidget {
               children: <Widget>[
                 // https://coolsymbol.com/
                 const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
-                this._createRemoteLocaleText(Localizations.localeOf(context), 'This is a text from remote'),
+                Flexible(
+                  child: this._createRemoteLocaleText(Localizations.localeOf(context), 'This is a text from remote'),
+                ),
               ],
             ),
           ],
