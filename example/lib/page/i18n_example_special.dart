@@ -29,6 +29,21 @@ class I18nExampleSpecialPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        const Text(
+          '''
+final I18n _i18n = I18n.build(
+  module: I18nExampleSpecialPage,
+  namespace: 'example/special',
+);''',
+          style: TextStyle(color: Colors.grey),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12.0, bottom: 12.0),
+          child: const Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
