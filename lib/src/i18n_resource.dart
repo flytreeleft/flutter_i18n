@@ -43,11 +43,18 @@ class _I18nMessage {
 }
 
 class I18nMessage {
+  final String _error;
   final Map<String, _I18nMessage> _message;
 
-  I18nMessage({Map<String, _I18nMessage> message}) : this._message = message;
+  I18nMessage({Map<String, _I18nMessage> message, String error})
+      : this._message = message,
+        this._error = error;
 
   String parse(String defaultText, {dynamic args, String annotation}) {
+    if (this._error != null && this._error != '') {
+      return this._error;
+    }
+
     String messageKey = createKey(annotation, defaultText);
 
     String text = defaultText;
@@ -74,29 +81,32 @@ class I18nMessage {
 }
 
 class I18nResource {
+  final String _error;
   final Map<String, Map<String, _I18nMessage>> _messages;
 
-  I18nResource({Map<String, Map<String, _I18nMessage>> messages}) : this._messages = messages;
+  I18nResource({Map<String, Map<String, _I18nMessage>> messages, String error})
+      : this._messages = messages,
+        this._error = error;
 
   I18nMessage get({String namespace, String module}) {
     String ns = '$namespace/$module';
 
-    return I18nMessage(message: this._messages[ns] ?? {});
+    return I18nMessage(message: this._messages[ns] ?? {}, error: this._error);
   }
 
   static Future<I18nResource> load(Locale locale, {@required String basePath, @required String manifestPath}) async {
     Map<String, String> resourceMap = {};
 
-    if (_regexUrlMatch.hasMatch(basePath)) {
-      // TODO cache into local when loading successfully, otherwise, load the existing resources from the cache.
-      try {
+    String error;
+    try {
+      if (_regexUrlMatch.hasMatch(basePath)) {
+        // TODO cache into local when loading successfully, otherwise, load the existing resources from the cache.
         resourceMap = await _loadRemoteResources(basePath, manifestPath);
-      } catch (e) {
-        print(e);
-        throw e;
+      } else {
+        resourceMap = await _loadLocalResources(basePath, manifestPath);
       }
-    } else {
-      resourceMap = await _loadLocalResources(basePath, manifestPath);
+    } catch (e) {
+      error = e.toString();
     }
 
     Map<String, Map<String, _I18nMessage>> messages = {};
@@ -106,7 +116,7 @@ class I18nResource {
       messages.addAll(_parseMessageYaml(locale, namespace, yaml));
     }
 
-    return I18nResource(messages: messages);
+    return I18nResource(messages: messages, error: error);
   }
 }
 
