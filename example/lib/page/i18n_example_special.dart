@@ -44,12 +44,14 @@ class I18nExampleSpecialPage extends StatelessWidget {
               children: <Widget>[
                 // https://coolsymbol.com/
                 const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
-                Text(
-                  _i18n.of(context).lang(
-                        'This an english text, but it will be translated to Chinese',
-                        lang: 'zh_Hans',
-                      ),
-                  style: const TextStyle(color: Colors.blue, fontSize: 18),
+                Flexible(
+                  child: Text(
+                    _i18n.of(context).lang(
+                          'This an english text, but it will be translated to Chinese',
+                          lang: 'zh_Hans',
+                        ),
+                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                  ),
                 ),
               ],
             ),
@@ -70,9 +72,11 @@ class I18nExampleSpecialPage extends StatelessWidget {
               children: <Widget>[
                 // https://coolsymbol.com/
                 const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
-                Text(
-                  _i18n.of(context).lang('this.is.a.text.with.property.key'),
-                  style: const TextStyle(color: Colors.blue, fontSize: 18),
+                Flexible(
+                  child: Text(
+                    _i18n.of(context).lang('this.is.a.text.with.property.key'),
+                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                  ),
                 ),
               ],
             ),

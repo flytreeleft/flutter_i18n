@@ -110,7 +110,6 @@ class I18nExampleAdvancePage extends StatelessWidget {
 
         return Loading(
           indicator: BallPulseIndicator(),
-          size: 100.0,
           color: Colors.pink,
         );
       },
