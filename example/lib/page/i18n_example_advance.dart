@@ -101,17 +101,18 @@ class I18nExampleAdvancePage extends StatelessWidget {
     return FutureBuilder<String>(
       future: this._fetchRemoteLocale(locale, text),
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        if (snapshot.hasData) {
-          return Text(
-            snapshot.data,
-            style: const TextStyle(color: Colors.blue, fontSize: 18),
-          );
+        switch (snapshot.connectionState) {
+          case ConnectionState.done:
+            return Text(
+              snapshot.data ?? text,
+              style: const TextStyle(color: Colors.blue, fontSize: 18),
+            );
+          default:
+            return Loading(
+              indicator: BallPulseIndicator(),
+              color: Colors.pink,
+            );
         }
-
-        return Loading(
-          indicator: BallPulseIndicator(),
-          color: Colors.pink,
-        );
       },
     );
   }
@@ -120,7 +121,7 @@ class I18nExampleAdvancePage extends StatelessWidget {
     // Note: just for demo, so do not call I18n.delegate(...).load(...) directly
     return await I18n.delegate(
       basePath: 'https://raw.githubusercontent.com/flytreeleft/flutter_i18n/master/example/assets/i18n',
-      manifestPath: 'example/i18n.json',
-    ).load(locale).then((ctx) => ctx.module(namespace: 'example/advance').lang(text));
+      manifestPath: 'example/remote/i18n.json',
+    ).load(locale).then((ctx) => ctx.module(namespace: 'example/remote').lang(text));
   }
 }
