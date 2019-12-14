@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   # https://pub.dev/packages/yaml
   yaml: ^2.2.0
+  # https://pub.dev/packages/http
+  http: ^0.12.0+2
   # https://pub.dev/packages/mustache
   ## Note: using mustache will cause error:
   ##   import of dart:mirrors is not supported in the current Dart runtime
