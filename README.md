@@ -1,6 +1,10 @@
 Flutter I18n Plugin
 ==================================================
 
+<p align="center">
+    <img width="100" src="./assets/images/icon.png" alt="Flutter I18n" />
+</p>
+
 A simple and powerful Flutter i18n plugin.
 
 > Let's say **Bye Bye** to the **Property Key**.
