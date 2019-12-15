@@ -30,6 +30,7 @@ final RegExp _regexTemplateMatch = RegExp(r'\{\{[^\{\}]+\}\}', multiLine: true);
 final RegExp _regexUrlMatch = RegExp(r'^http(s)?://[^/\\]+');
 final RegExp _regexFileSuffixMatch = RegExp(r'\.[^.]+$');
 final RegExp _regexDefaultPathEndingMatch = RegExp(r'/default$');
+final RegExp _regexBlankCharsMatch = RegExp(r'\s+');
 
 class _I18nMessage {
   final String _defaultText;
@@ -199,19 +200,13 @@ Map<String, Map<String, _I18nMessage>> _parseMessageModule(List<String> localeCo
       assert(messageNode is Map, 'The message node should be a map, but got "$messageNode"');
 
       String localeText;
-      String defaultText = '';
-      String annotation = '';
-      for (String messageNodeKey in messageNode.keys) {
-        String text = (messageNode[messageNodeKey] ?? '').trim();
+      String defaultText = messageNode['_'];
+      String annotation = _trimToEmpty(messageNode['annotation']).replaceAll(_regexBlankCharsMatch, '_');
 
-        if ('_' == messageNodeKey) {
-          defaultText = text;
-        } else if ('annotation' == messageNodeKey) {
-          annotation = text;
-        } else if (localeCodes.contains(messageNodeKey)) {
-          localeText = text;
-        } else {
-          // Unknown message node key
+      for (String localeCode in localeCodes) {
+        if (messageNode.containsKey(localeCode)) {
+          localeText = messageNode[localeCode];
+          break;
         }
       }
 
@@ -235,16 +230,9 @@ Map<String, Map<String, _I18nMessage>> _parseMessageModule(List<String> localeCo
 }
 
 List<String> _parseLocalCodes(Locale locale) {
-  List<String> codes = [locale.languageCode];
+  List<String> codes = [];
 
-  if (locale.countryCode != null) {
-    codes.addAll([locale.languageCode + '_' + locale.countryCode, locale.languageCode + '-' + locale.countryCode]);
-  }
-
-  if (locale.scriptCode != null) {
-    codes.addAll([locale.languageCode + '_' + locale.scriptCode, locale.languageCode + '-' + locale.scriptCode]);
-  }
-
+  // Sort codes by the priority
   if (locale.countryCode != null && locale.scriptCode != null) {
     codes.addAll([
       locale.languageCode + '_' + locale.scriptCode + '_' + locale.countryCode,
@@ -252,5 +240,19 @@ List<String> _parseLocalCodes(Locale locale) {
     ]);
   }
 
+  if (locale.scriptCode != null) {
+    codes.addAll([locale.languageCode + '_' + locale.scriptCode, locale.languageCode + '-' + locale.scriptCode]);
+  }
+
+  if (locale.countryCode != null) {
+    codes.addAll([locale.languageCode + '_' + locale.countryCode, locale.languageCode + '-' + locale.countryCode]);
+  }
+
+  codes.add(locale.languageCode);
+
   return codes;
+}
+
+String _trimToEmpty(var str) {
+  return (str ?? '').trim();
 }
