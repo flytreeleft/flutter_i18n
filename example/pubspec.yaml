@@ -38,7 +38,8 @@ flutter:
   assets:
     #- assets/i18n/default.yaml
     #- assets/i18n/page.yaml
-    # Or just specify the i18n directory (needs to end with `/`)
+    # Or just specify the i18n directory (needs to end with `/`).
+    # Note, the subdirectory should be specified explicitly.
     - assets/i18n/
     - assets/i18n/example/
 
