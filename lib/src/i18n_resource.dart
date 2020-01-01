@@ -14,245 +14,74 @@
  * limitations under the License.
  */
 
-import 'dart:ui';
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-
-import 'package:http/http.dart' as http;
-import 'package:reflected_mustache/mustache.dart';
-
-import 'package:yaml/yaml.dart';
-
-final RegExp _regexTemplateMatch = RegExp(r'\{\{[^\{\}]+\}\}', multiLine: true);
-final RegExp _regexUrlMatch = RegExp(r'^http(s)?://[^/\\]+');
-final RegExp _regexFileSuffixMatch = RegExp(r'\.[^.]+$');
-final RegExp _regexDefaultPathEndingMatch = RegExp(r'/default$');
-final RegExp _regexBlankCharsMatch = RegExp(r'\s+');
-
-class _I18nMessage {
-  final String _defaultText;
-  final String _annotation;
-  final String _localeText;
-
-  const _I18nMessage({String defaultText, String annotation, String localeText})
-      : this._defaultText = defaultText,
-        this._annotation = annotation,
-        this._localeText = localeText == '' ? null : localeText;
-}
-
-class I18nMessage {
-  final String _error;
-  final Map<String, _I18nMessage> _message;
-
-  I18nMessage({Map<String, _I18nMessage> message, String error})
-      : this._message = message,
-        this._error = error;
-
-  String parse(String defaultText, {dynamic args, String annotation}) {
-    if (this._error != null && this._error != '') {
-      return this._error;
-    }
-
-    String messageKey = createKey(annotation, defaultText);
-
-    String text = defaultText;
-    if (this._message[messageKey] != null) {
-      text = this._message[messageKey]._localeText ?? this._message[messageKey]._defaultText;
-    }
-
-    if (!text.contains(_regexTemplateMatch)) {
-      return text;
-    }
-
-    Template template = Template(text);
-
-    return template.renderString(args ?? {});
-  }
-
-  static String key(_I18nMessage message) {
-    return createKey(message._annotation, message._defaultText);
-  }
-
-  static String createKey(String annotation, String defaultText) {
-    return '${annotation ?? ""}:${defaultText ?? ""}';
-  }
-}
+import './i18n_message.dart';
 
 class I18nResource {
+  /// The [I18nMessages] which is associated with the [I18nModule] whose
+  /// key is concatenated with [namespace] and [module].
+  final Map<String, I18nMessages> _messagesMap;
+
+  I18nResource(Map<String, I18nMessages> messagesMap) : this._messagesMap = messagesMap ?? {};
+
+  /// Return [null] when no matched module was associated.
+  I18nMessages get(String namespace, String module) {
+    final String ns = '$namespace/$module';
+
+    if (this._messagesMap.containsKey(ns)) {
+      return this._messagesMap[ns];
+    }
+    return null;
+  }
+}
+
+/// A [I18nResource] which occurs some error.
+/// It will always return the [_error] content when calling [I18nMessage].parse().
+class I18nErrorOccurredResource extends I18nResource {
   final String _error;
-  final Map<String, Map<String, _I18nMessage>> _messages;
 
-  I18nResource({Map<String, Map<String, _I18nMessage>> messages, String error})
-      : this._messages = messages,
-        this._error = error;
+  I18nErrorOccurredResource(this._error) : super(null);
 
-  I18nMessage get({String namespace, String module}) {
-    String ns = '$namespace/$module';
-
-    return I18nMessage(message: this._messages[ns] ?? {}, error: this._error);
-  }
-
-  static Future<I18nResource> load(Locale locale, {@required String basePath, @required String manifestPath}) async {
-    Map<String, String> resourceMap = {};
-
-    String error;
-    try {
-      if (_regexUrlMatch.hasMatch(basePath)) {
-        // TODO cache into local when loading successfully, otherwise, load the existing resources from the cache.
-        resourceMap = await _loadRemoteResources(basePath, manifestPath);
-      } else {
-        resourceMap = await _loadLocalResources(basePath, manifestPath);
-      }
-    } catch (e) {
-      error = e.toString();
-    }
-
-    Map<String, Map<String, _I18nMessage>> messages = {};
-    for (String namespace in resourceMap.keys) {
-      String yaml = resourceMap[namespace];
-
-      messages.addAll(_parseMessageYaml(locale, namespace, yaml));
-    }
-
-    return I18nResource(messages: messages, error: error);
+  @override
+  I18nMessages get(String namespace, String module) {
+    return _I18nErrorOccurredMessages(this._error);
   }
 }
 
-Future<Map<String, String>> _loadLocalResources(String basePath, String manifestPath) async {
-  // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
-  // {..., {"assets/i18n/default.yaml":["assets/i18n/default.yaml"],"assets/i18n/page.yaml":["assets/i18n/page.yaml"]}
-  final manifestContent = await rootBundle.loadString(manifestPath);
-  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+/// A [I18nResource] which combined multiple [I18nResource]s.
+class I18nCombinedResource extends I18nResource {
+  final List<I18nResource> _resources;
 
-  final List<String> resourcePaths =
-      manifestMap.keys.where((String key) => key.startsWith(basePath + '/') && key.endsWith('.yaml')).toList();
+  I18nCombinedResource(List<I18nResource> resources)
+      : this._resources = resources,
+        super(null);
 
-  final Map<String, String> resources = {};
-
-  for (String resourcePath in resourcePaths) {
-    // Remove '/default' from subdirectory path
-    final String namespace = resourcePath
-        .substring(basePath.length + 1)
-        .replaceAll(_regexFileSuffixMatch, '')
-        .replaceAll(_regexDefaultPathEndingMatch, '');
-
-    final String yaml = await rootBundle.loadString(resourcePath);
-
-    resources[namespace] = yaml;
-  }
-
-  return resources;
-}
-
-Future<Map<String, String>> _loadRemoteResources(String basePath, String manifestPath) async {
-  final String manifestUrl = '$basePath/$manifestPath';
-  final String manifestContent = await http.get(manifestUrl).then((response) => response.body);
-  final List<dynamic> resourcePaths = json.decode(manifestContent);
-
-  final Map<String, String> resources = {};
-
-  for (String resourcePath in resourcePaths) {
-    // Remove '/default' from subdirectory path
-    final String namespace =
-        resourcePath.replaceAll(_regexFileSuffixMatch, '').replaceAll(_regexDefaultPathEndingMatch, '');
-
-    final String resourceUrl = '$basePath/$resourcePath';
-    final String yaml = await http.get(resourceUrl).then((response) => response.body);
-
-    resources[namespace] = yaml;
-  }
-
-  return resources;
-}
-
-Map<String, Map<String, _I18nMessage>> _parseMessageYaml(Locale locale, String namespace, String yaml) {
-  final i18nNode = (loadYaml(yaml) ?? {})['i18n'] ?? {};
-  assert(
-    i18nNode is Map,
-    'The root node - i18n (in "$namespace.yaml") should be a map, but got "${i18nNode.runtimeType}".',
-  );
-
-  final List<String> matchingLocales = _parseLocalCodes(locale);
-
-  return _parseMessageModule(matchingLocales, namespace, i18nNode);
-}
-
-Map<String, Map<String, _I18nMessage>> _parseMessageModule(List<String> localeCodes, String namespace, messageNodes) {
-  if (messageNodes is Map) {
-    Map<String, Map<String, _I18nMessage>> nsMessages = {};
-
-    for (String module in messageNodes.keys) {
-      String ns = '$namespace/$module';
-
-      nsMessages.addAll(_parseMessageModule(localeCodes, ns, messageNodes[module]));
-    }
-
-    return nsMessages;
-  } else if (messageNodes != null) {
-    assert(messageNodes is List, 'The node $namespace should be a list, but got "${messageNodes.runtimeType}"');
-
-    Map<String, _I18nMessage> messages = {};
-
-    for (var messageNode in messageNodes) {
-      assert(messageNode is Map, 'The message node should be a map, but got "$messageNode"');
-
-      String localeText;
-      String defaultText = messageNode['_'];
-      String annotation = _trimToEmpty(messageNode['annotation']).replaceAll(_regexBlankCharsMatch, '_');
-
-      for (String localeCode in localeCodes) {
-        if (messageNode.containsKey(localeCode)) {
-          localeText = messageNode[localeCode];
-          break;
-        }
+  /// Return [null] when no matched module was associated.
+  @override
+  I18nMessages get(String namespace, String module) {
+    for (I18nResource resource in this._resources) {
+      if (resource == null) {
+        continue;
       }
 
-      assert(defaultText != '', 'No default text was specified in "$messageNode"');
+      I18nMessages messages = resource.get(namespace, module);
 
-      _I18nMessage message = _I18nMessage(defaultText: defaultText, annotation: annotation, localeText: localeText);
-      String messageKey = I18nMessage.key(message);
-
-      assert(
-        messages[messageKey] == null,
-        'The following message was already defined in "$namespace":\n    $defaultText',
-      );
-
-      messages[messageKey] = message;
+      if (messages != null) {
+        return messages;
+      }
     }
 
-    return {namespace: messages};
+    return null;
   }
-
-  return {};
 }
 
-List<String> _parseLocalCodes(Locale locale) {
-  List<String> codes = [];
+class _I18nErrorOccurredMessages extends I18nMessages {
+  final String _error;
 
-  // Sort codes by the priority
-  if (locale.countryCode != null && locale.scriptCode != null) {
-    codes.addAll([
-      locale.languageCode + '_' + locale.scriptCode + '_' + locale.countryCode,
-      locale.languageCode + '-' + locale.scriptCode + '-' + locale.countryCode
-    ]);
+  _I18nErrorOccurredMessages(this._error) : super(null);
+
+  /// Get [I18nMessage] which will always return the [_error] content when calling [I18nMessage].parse().
+  @override
+  I18nMessage get(String defaultText, {String annotation}) {
+    return I18nMessage(this._error, null, null, disableParser: true);
   }
-
-  if (locale.scriptCode != null) {
-    codes.addAll([locale.languageCode + '_' + locale.scriptCode, locale.languageCode + '-' + locale.scriptCode]);
-  }
-
-  if (locale.countryCode != null) {
-    codes.addAll([locale.languageCode + '_' + locale.countryCode, locale.languageCode + '-' + locale.countryCode]);
-  }
-
-  codes.add(locale.languageCode);
-
-  return codes;
-}
-
-String _trimToEmpty(var str) {
-  return (str ?? '').trim();
 }

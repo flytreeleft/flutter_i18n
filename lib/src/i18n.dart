@@ -18,46 +18,64 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import './i18n_const.dart';
+import './i18n_module.dart';
 import './i18n_resource.dart';
+import './i18n_resource_loader.dart';
 
-const _default_module = '_';
-const _default_namespace = 'default';
-const _default_base_path = 'assets/i18n';
-const _default_manifest_path = 'AssetManifest.json';
+const I18nResourceLoaderSpec _default_loader = const I18nResourceLoaderSpec(cacheable: true, showError: false);
 
 class I18n {
+  final String _package;
   final String _namespace;
   final String _module;
 
-  const I18n({String namespace, String module})
-      : this._module = module,
+  const I18n({String package, String namespace, String module})
+      : this._package = package,
+        this._module = module,
         this._namespace = namespace;
 
-  static _I18nDelegate delegate({String basePath, String manifestPath}) {
-    return _I18nDelegate(basePath ?? _default_base_path, manifestPath ?? _default_manifest_path);
+  I18nModule of(BuildContext context) {
+    I18nModuleContext moduleContext = Localizations.of<I18nModuleContext>(context, I18nModuleContext);
+
+    if (moduleContext == null) {
+      moduleContext = I18nModuleContext.noop;
+    }
+
+    return moduleContext.module(package: this._package, namespace: this._namespace, module: this._module);
   }
 
   static I18n build({String package, String namespace, dynamic module}) {
-    // TODO Support 'package' for a Flutter library: try to load the i18n message resources from 'packages/<lib_name>/assets/i18n' first
     final name = module == null || module is String ? module : module.toString();
 
-    return I18n(module: name, namespace: namespace);
+    return I18n(package: package, namespace: namespace, module: name);
   }
 
-  _I18nLang of(BuildContext context) {
-    _I18nLangContext langContext = Localizations.of<_I18nLangContext>(context, _I18nLangContext);
-
-    return langContext.module(namespace: this._namespace, module: this._module);
+  static _I18nDelegate delegate({String basePath, String manifestPath, I18nResourceLoaderSpec loader}) {
+    return _I18nDelegate(
+      basePath ?? default_base_path,
+      manifestPath ?? default_manifest_path,
+      loader ?? _default_loader,
+    );
   }
 }
 
-class _I18nDelegate extends LocalizationsDelegate<_I18nLangContext> {
+class _I18nDelegate extends LocalizationsDelegate<I18nModuleContext> {
   final String _basePath;
   final String _manifestPath;
+  final I18nResourceLoader _normalResourceLoader;
 
-  _I18nDelegate(String basePath, String manifestPath)
-      : this._basePath = basePath.replaceAll(RegExp(r'^/+|/+$'), ''),
-        this._manifestPath = manifestPath;
+  final I18nPackageResourceLoader _packageResourceLoader = const I18nPackageResourceLoader(
+    cacheable: true,
+    probePath: default_package_probe_path,
+  );
+
+  _I18nDelegate(String basePath, String manifestPath, I18nResourceLoaderSpec loader)
+      : this._basePath = basePath,
+        this._manifestPath = manifestPath,
+        this._normalResourceLoader = loader.load != null
+            ? I18nUserDefinedResourceLoader(loader)
+            : I18nLocalOrRemoteResourceLoader(cacheable: loader.cacheable);
 
   // Support all locale language
   @override
@@ -66,51 +84,14 @@ class _I18nDelegate extends LocalizationsDelegate<_I18nLangContext> {
   @override
   bool shouldReload(_I18nDelegate old) => false;
 
+  /// When the [locale] is changed, this method will be called.
+  /// Note, if [loader].cacheable is true, all i18n resources will be cached
+  /// even if the loader instances were rebuilt.
   @override
-  Future<_I18nLangContext> load(Locale locale) async {
-    // TODO Load and cache all language messages
-    // Assume that changing language isn't a high frequency action,
-    // so we just rebuild the _I18nContext to save the memory.
-    _I18nLangContext langContext = _I18nLangContext(locale);
+  Future<I18nModuleContext> load(Locale locale) async {
+    I18nResource packageResource = await this._packageResourceLoader.load(locale, this._basePath, this._manifestPath);
+    I18nResource normalResource = await this._normalResourceLoader.load(locale, this._basePath, this._manifestPath);
 
-    await langContext.load(this._basePath, this._manifestPath);
-
-    return langContext;
-  }
-}
-
-class _I18nLangContext {
-  final Locale _locale;
-
-  I18nResource _resource;
-
-  _I18nLangContext(this._locale);
-
-  _I18nLang module({String namespace, String module}) {
-    return _I18nLang(context: this, namespace: namespace, module: module);
-  }
-
-  Future<bool> load(String basePath, String manifestPath) async {
-    this._resource = await I18nResource.load(this._locale, basePath: basePath, manifestPath: manifestPath);
-
-    return true;
-  }
-}
-
-class _I18nLang {
-  final String _namespace;
-  final String _module;
-  final _I18nLangContext _context;
-
-  const _I18nLang({_I18nLangContext context, String namespace, String module})
-      : this._namespace = namespace ?? _default_namespace,
-        this._module = module ?? _default_module,
-        this._context = context;
-
-  String lang(String text, {dynamic args, String annotation, lang}) {
-    // TODO Call `lang.toString()`
-    final I18nMessage message = this._context._resource.get(namespace: this._namespace, module: this._module);
-
-    return message.parse(text, args: args, annotation: annotation);
+    return I18nModuleContext(locale, I18nCombinedResource([packageResource, normalResource]));
   }
 }

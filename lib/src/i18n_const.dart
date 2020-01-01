@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 flytreeleft<flytreeleft@crazydan.org>
+ * Copyright (C) 2020 flytreeleft<flytreeleft@crazydan.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-// https://dart.dev/guides/libraries/create-library-packages
-export 'src/i18n.dart';
-export 'src/i18n_resource_loader.dart';
-export 'src/i18n_resource_parser.dart';
+/// Default package represents the current app whose resources will not be putted into 'packages/'.
+const default_package = '_';
+const default_namespace = 'default';
+const default_module = '_';
+
+const default_base_path = 'assets/i18n';
+const default_manifest_path = 'AssetManifest.json';
+const default_package_probe_path = '.i18n.manifest.yaml';
