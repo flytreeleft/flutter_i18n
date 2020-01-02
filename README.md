@@ -29,7 +29,8 @@ A simple and powerful Flutter i18n plugin.
 - [**WIP**] Support to be used in the Flutter libraries.
 - Dynamic change language when needed, e.g.
   `i18n.lang('This an english text, but it will be translated to Chinese', lang: 'zh_Hans')`.
-- Support to custom the way to load your i18n message resources.
+- Support to custom the way to load or parse your i18n message resources.
+- Enable debug mode which means disabling caches and showing errors.
 
 ## Demo
 
