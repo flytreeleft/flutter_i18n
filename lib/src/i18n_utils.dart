@@ -16,6 +16,8 @@
 
 import 'dart:ui';
 
+final RegExp _regexAllUpperCharsMatch = RegExp(r'^[A-Z]+$');
+
 final Map<Locale, List<String>> _localeCodesMap = {};
 final Map<String, Locale> _strLocaleMap = {};
 
@@ -74,9 +76,15 @@ Locale strToLocale(String str) {
     locale = Locale(codes[0]);
   } else if (codes.length == 3) {
     locale = Locale.fromSubtags(languageCode: codes[0], scriptCode: codes[1], countryCode: codes[2]);
+  } else {
+    bool maybeCountryCode = _regexAllUpperCharsMatch.hasMatch(codes[1]);
+
+    locale = Locale.fromSubtags(
+      languageCode: codes[0],
+      scriptCode: maybeCountryCode ? null : codes[1],
+      countryCode: maybeCountryCode ? codes[1] : null,
+    );
   }
 
-  _strLocaleMap[trimmedStr] = locale = Locale(codes[0], codes[1]);
-
-  return locale;
+  return (_strLocaleMap[trimmedStr] = locale);
 }

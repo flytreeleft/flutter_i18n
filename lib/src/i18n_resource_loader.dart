@@ -118,94 +118,96 @@ class I18nUserDefinedResourceLoader extends I18nResourceLoader {
 
 /// The [I18nResourceLoader] for loading the i18n messages from the app's local or remote resources.
 /// Whether loading from local or remote, dependent on if the [basePath] is a local file or a remote url.
-class I18nLocalOrRemoteResourceLoader extends I18nResourceLoader {
-  const I18nLocalOrRemoteResourceLoader({bool cacheable, bool showError})
-      : super(cacheable: cacheable, showError: showError);
-
-  @override
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath) {
-    I18nResourceLoader loader;
-
-    if (_regexUrlMatch.hasMatch(basePath)) {
-      loader = I18nRemoteResourceLoader(cacheable: this.cacheable, showError: this.showError);
-    } else {
-      loader = I18nLocalResourceLoader(cacheable: this.cacheable, showError: this.showError);
-    }
-
-    return loader.loadResourceFiles(locale, basePath, manifestPath);
-  }
-}
-
-/// The [I18nResourceLoader] for loading the i18n messages from the app's local resources.
-class I18nLocalResourceLoader extends I18nResourceLoader {
-  const I18nLocalResourceLoader({bool cacheable, bool showError}) : super(cacheable: cacheable, showError: showError);
-
-  @override
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath) async {
-    // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
-    // {..., {"assets/i18n/default.yaml":["assets/i18n/default.yaml"],"assets/i18n/page.yaml":["assets/i18n/page.yaml"]}
-    final manifestContent = await rootBundle.loadString(manifestPath);
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-    final List<String> resourcePaths =
-        manifestMap.keys.where((String key) => key.startsWith(basePath + '/') && key.endsWith('.yaml')).toList();
-
-    final Map<String, String> resources = {};
-
-    for (String resourcePath in resourcePaths) {
-      // Remove '/default' from subdirectory path
-      final String namespace = resourcePath
-          .substring(basePath.length + 1)
-          .replaceAll(_regexFileSuffixMatch, '')
-          .replaceAll(_regexDefaultPathEndingMatch, '');
-
-      final String yaml = await rootBundle.loadString(resourcePath);
-
-      resources[namespace] = yaml;
-    }
-
-    return resources;
-  }
-}
-
-/// The [I18nResourceLoader] for loading the i18n messages from the app's remote resources.
-class I18nRemoteResourceLoader extends I18nResourceLoader {
-  const I18nRemoteResourceLoader({bool cacheable, bool showError}) : super(cacheable: cacheable, showError: showError);
-
-  @override
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath) async {
-    final String manifestUrl = '$basePath/$manifestPath';
-    final String manifestContent = await http.get(manifestUrl).then((response) => response.body);
-    final List<dynamic> resourcePaths = json.decode(manifestContent);
-
-    final Map<String, String> resources = {};
-
-    for (String resourcePath in resourcePaths) {
-      // Remove '/default' from subdirectory path
-      final String namespace =
-          resourcePath.replaceAll(_regexFileSuffixMatch, '').replaceAll(_regexDefaultPathEndingMatch, '');
-
-      final String resourceUrl = '$basePath/$resourcePath';
-      final String yaml = await http.get(resourceUrl).then((response) => response.body);
-
-      resources[namespace] = yaml;
-    }
-
-    return resources;
-  }
+class I18nNormalResourceLoader extends I18nUserDefinedResourceLoader {
+  I18nNormalResourceLoader({bool cacheable, bool showError})
+      : super(
+          I18nResourceLoaderSpec(
+            cacheable: cacheable,
+            showError: showError,
+            load: _loadLocalOrRemoteResourceFiles,
+          ),
+        );
 }
 
 /// The [I18nResourceLoader] for loading the i18n messages from the libraries' resources.
-class I18nPackageResourceLoader extends I18nLocalResourceLoader {
-  final String probePath;
+class I18nPackageResourceLoader extends I18nUserDefinedResourceLoader {
+  I18nPackageResourceLoader({bool cacheable, bool showError, String probePath})
+      : super(
+          I18nResourceLoaderSpec(
+            cacheable: cacheable,
+            showError: showError,
+            load: (Locale locale, String basePath, String manifestPath) => _loadPackageResourceFiles(locale, probePath),
+          ),
+        );
+}
 
-  const I18nPackageResourceLoader({bool cacheable, bool showError, this.probePath})
-      : super(cacheable: cacheable, showError: showError);
+///////////////// Loader Functions //////////////////
 
-  @override
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath) async {
-    // TODO Ignore basePath and manifestPath
-    // TODO Add 'packages/xxx/' as namespace's prefix
-    return {};
+/// The [LoadFn] for loading the i18n messages from the app's local or remote resources.
+Future<Map<String, String>> _loadLocalOrRemoteResourceFiles(Locale locale, String basePath, String manifestPath) async {
+  LoadFn load;
+
+  if (_regexUrlMatch.hasMatch(basePath)) {
+    load = _loadRemoteResourceFiles;
+  } else {
+    load = _loadLocalResourceFiles;
   }
+
+  return load(locale, basePath, manifestPath);
+}
+
+/// The [LoadFn] for loading the i18n messages from the app's local resources.
+Future<Map<String, String>> _loadLocalResourceFiles(Locale locale, String basePath, String manifestPath) async {
+  // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
+  // {..., {"assets/i18n/default.yaml":["assets/i18n/default.yaml"],"assets/i18n/page.yaml":["assets/i18n/page.yaml"]}
+  final manifestContent = await rootBundle.loadString(manifestPath);
+  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+  final List<String> resourcePaths =
+      manifestMap.keys.where((String key) => key.startsWith(basePath + '/') && key.endsWith('.yaml')).toList();
+
+  final Map<String, String> resources = {};
+
+  for (String resourcePath in resourcePaths) {
+    // Remove '/default' from subdirectory path
+    final String namespace = resourcePath
+        .substring(basePath.length + 1)
+        .replaceAll(_regexFileSuffixMatch, '')
+        .replaceAll(_regexDefaultPathEndingMatch, '');
+
+    final String yaml = await rootBundle.loadString(resourcePath);
+
+    resources[namespace] = yaml;
+  }
+
+  return resources;
+}
+
+/// The [I18nResourceLoader] for loading the i18n messages from the app's remote resources.
+Future<Map<String, String>> _loadRemoteResourceFiles(Locale locale, String basePath, String manifestPath) async {
+  final String manifestUrl = '$basePath/$manifestPath';
+  final String manifestContent = await http.get(manifestUrl).then((response) => response.body);
+  final List<dynamic> resourcePaths = json.decode(manifestContent);
+
+  final Map<String, String> resources = {};
+
+  for (String resourcePath in resourcePaths) {
+    // Remove '/default' from subdirectory path
+    final String namespace =
+        resourcePath.replaceAll(_regexFileSuffixMatch, '').replaceAll(_regexDefaultPathEndingMatch, '');
+
+    final String resourceUrl = '$basePath/$resourcePath';
+    final String yaml = await http.get(resourceUrl).then((response) => response.body);
+
+    resources[namespace] = yaml;
+  }
+
+  return resources;
+}
+
+/// The [LoadFn] for loading the i18n messages from the libraries' resources.
+Future<Map<String, String>> _loadPackageResourceFiles(Locale locale, String probePath) async {
+  // TODO Ignore basePath and manifestPath
+  // TODO Add 'packages/xxx/' as namespace's prefix
+  return {};
 }

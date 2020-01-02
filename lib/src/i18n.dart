@@ -36,9 +36,9 @@ class I18n {
         this._namespace = namespace;
 
   I18nModule of(BuildContext context) {
-    I18nModuleContext moduleContext = Localizations.of<I18nModuleContext>(context, I18nModuleContext);
+    I18nModuleContext moduleContext;
 
-    if (moduleContext == null) {
+    if (context == null || (moduleContext = Localizations.of<I18nModuleContext>(context, I18nModuleContext)) == null) {
       moduleContext = I18nModuleContext.noop;
     }
 
@@ -51,11 +51,23 @@ class I18n {
     return I18n(package: package, namespace: namespace, module: name);
   }
 
-  static _I18nDelegate delegate({String basePath, String manifestPath, I18nResourceLoaderSpec loader}) {
+  static _I18nDelegate delegate({
+    String basePath,
+    String manifestPath,
+    I18nResourceLoaderSpec loader,
+    bool debug: false,
+  }) {
+    loader = loader ?? _default_loader;
+
     return _I18nDelegate(
       basePath ?? default_base_path,
       manifestPath ?? default_manifest_path,
-      loader ?? _default_loader,
+      I18nResourceLoaderSpec(
+        cacheable: !debug && loader.cacheable,
+        showError: debug || loader.showError,
+        load: loader.load,
+        parse: loader.parse,
+      ),
     );
   }
 }
@@ -65,8 +77,9 @@ class _I18nDelegate extends LocalizationsDelegate<I18nModuleContext> {
   final String _manifestPath;
   final I18nResourceLoader _normalResourceLoader;
 
-  final I18nPackageResourceLoader _packageResourceLoader = const I18nPackageResourceLoader(
-    cacheable: true,
+  final I18nPackageResourceLoader _packageResourceLoader = I18nPackageResourceLoader(
+    cacheable: _default_loader.cacheable,
+    showError: _default_loader.showError,
     probePath: default_package_probe_path,
   );
 
@@ -75,7 +88,7 @@ class _I18nDelegate extends LocalizationsDelegate<I18nModuleContext> {
         this._manifestPath = manifestPath,
         this._normalResourceLoader = loader.load != null
             ? I18nUserDefinedResourceLoader(loader)
-            : I18nLocalOrRemoteResourceLoader(cacheable: loader.cacheable);
+            : I18nNormalResourceLoader(cacheable: loader.cacheable, showError: loader.showError);
 
   // Support all locale language
   @override
@@ -89,7 +102,7 @@ class _I18nDelegate extends LocalizationsDelegate<I18nModuleContext> {
   /// even if the loader instances were rebuilt.
   @override
   Future<I18nModuleContext> load(Locale locale) async {
-    I18nResource packageResource = await this._packageResourceLoader.load(locale, this._basePath, this._manifestPath);
+    I18nResource packageResource = await this._packageResourceLoader.load(locale, 'packages', default_manifest_path);
     I18nResource normalResource = await this._normalResourceLoader.load(locale, this._basePath, this._manifestPath);
 
     return I18nModuleContext(locale, I18nCombinedResource([packageResource, normalResource]));

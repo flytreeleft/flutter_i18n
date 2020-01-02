@@ -120,5 +120,5 @@ class I18nResourceParser {
 }
 
 String toMapPath(String namespace, List<dynamic> sub) {
-  return namespace.replaceAll('/', '.') + (sub ?? []).join('.');
+  return namespace + (sub ?? []).join('.');
 }
