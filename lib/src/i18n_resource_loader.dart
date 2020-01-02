@@ -163,8 +163,9 @@ Future<Map<String, String>> _loadLocalResourceFiles(Locale locale, String basePa
   final manifestContent = await rootBundle.loadString(manifestPath);
   final Map<String, dynamic> manifestMap = json.decode(manifestContent);
 
-  final List<String> resourcePaths =
-      manifestMap.keys.where((String key) => key.startsWith(basePath + '/') && key.endsWith('.yaml')).toList();
+  final List<String> resourcePaths = manifestMap.keys
+      .where((String key) => key.startsWith(basePath + '/') && (key.endsWith('.yaml') || key.endsWith('.yml')))
+      .toList();
 
   final Map<String, String> resources = {};
 
