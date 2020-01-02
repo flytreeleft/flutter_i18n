@@ -76,7 +76,7 @@ class _I18nAppState extends State<I18nApp> {
       locale: this.widget.appState.locale,
       supportedLocales: this.widget.appState.supportedLocales,
       localizationsDelegates: [
-        I18n.delegate(),
+        I18n.delegate(debug: true),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],

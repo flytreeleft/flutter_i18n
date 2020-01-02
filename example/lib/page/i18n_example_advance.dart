@@ -138,6 +138,7 @@ final I18n _i18n = I18n.build(
     return await I18n.delegate(
       basePath: 'https://raw.githubusercontent.com/flytreeleft/flutter_i18n/master/example/assets/i18n',
       manifestPath: 'example/remote/i18n.json',
+      loader: const I18nResourceLoaderSpec(cacheable: false, showError: true),
     ).load(locale).then((ctx) => ctx.module(namespace: 'example/remote').lang(text));
   }
 }

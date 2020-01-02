@@ -51,7 +51,7 @@ final I18n _i18n = I18n.build(
               '''
 • _i18n.of(context).lang(
   'This an english text, but it will be translated to Chinese',
-  lang: 'zh_Hans',
+  locale: 'zh_Hans',
 )''',
               style: TextStyle(color: Colors.green, fontStyle: FontStyle.italic),
             ),
@@ -63,7 +63,7 @@ final I18n _i18n = I18n.build(
                   child: Text(
                     _i18n.of(context).lang(
                           'This an english text, but it will be translated to Chinese',
-                          lang: 'zh_Hans',
+                          locale: 'zh_Hans',
                         ),
                     style: const TextStyle(color: Colors.blue, fontSize: 18),
                   ),
@@ -97,7 +97,67 @@ final I18n _i18n = I18n.build(
             ),
           ],
         ),
+        SizedBox(
+          height: 18,
+          child: Container(),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              "• _i18n.of(null).lang('This is a text in a null BuildContext')",
+              style: TextStyle(color: Colors.green, fontStyle: FontStyle.italic),
+            ),
+            Row(
+              children: <Widget>[
+                // https://coolsymbol.com/
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                Flexible(
+                  child: Text(
+                    _i18n.of(null).lang('This is a text in a null BuildContext'),
+                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 18,
+          child: Container(),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              '''
+• final I18n i18n = I18n.build(package: 'flutter_i18n');
+  i18n.of(context).lang(
+    'This is for you',
+  )''',
+              style: TextStyle(color: Colors.green, fontStyle: FontStyle.italic),
+            ),
+            Row(
+              children: <Widget>[
+                // https://coolsymbol.com/
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                Flexible(
+                  child: Text(
+                    getPackageLocaleText(context, 'flutter_i18n', 'This is for you'),
+                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  String getPackageLocaleText(BuildContext context, String package, String text) {
+    final I18n i18n = I18n.build(package: package);
+
+    return i18n.of(context).lang(text);
   }
 }
