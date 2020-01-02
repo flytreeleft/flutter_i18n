@@ -3,6 +3,6 @@ i18n:
     - _: This is a text from remote
       en_US: This is a text from remote (en_US)
       en_GB: This is a text from remote (en_GB)
-      zh: 这是一段来自远端服务的文本
+      zh: 这是一段来自远端服务的文本 (zh)
       zh_Hans: 这是一段来自远端服务的文本 (简体)
       zh_Hant: 這是一段來自遠端服務的文本 (繁體)

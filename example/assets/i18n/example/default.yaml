@@ -13,13 +13,13 @@ i18n:
     - _: This is a text
       en_US: This is a text (en_US)
       en_GB: This is a text (en_GB)
-      zh: 这是一段文本
+      zh: 这是一段文本 (zh)
       zh_Hans: 这是一段文本 (简体)
       zh_Hant: 這是一段文本 (繁體)
     - _: Hello, {{ name.en }}!
       en_US: Hello, {{ name.en }}! (en_US)
       en_GB: Hello, {{ name.en }}! (en_GB)
-      zh: 您好，{{ name.zh }}！
+      zh: 您好，{{ name.zh }}！ (zh)
       zh_Hans: 您好，{{ name.zh }}！(简体)
       zh_Hant: 您好，{{ name.zh }}！(繁體)
   special:
@@ -27,13 +27,13 @@ i18n:
       - _: This an english text, but it will be translated to Chinese
         en_US: This an english text, but it will be translated to Chinese (en_US)
         en_GB: This an english text, but it will be translated to Chinese (en_GB)
-        zh: 这本应该是一段英文文本，但却会被转译为中文
+        zh: 这本应该是一段英文文本，但却会被转译为中文 (zh)
         zh_Hans: 这本应该是一段英文文本，但却会被转译为中文 (简体)
         zh_Hant: 這本應該是一段英文文本，但卻會被轉譯為中文 (繁體)
       - _: "this.is.a.text.with.property.key"
-        en: This is a text mapping by a property key (en)
+        en: This is a text mapping by a property key
         en_US: This is a text mapping by a property key (en_US)
         en_GB: This is a text mapping by a property key (en_GB)
-        zh: 这是一段通过Property Key映射到的文本
+        zh: 这是一段通过Property Key映射到的文本 (zh)
         zh_Hans: 这是一段通过Property Key映射到的文本 (简体)
         zh_Hant: 這是一段通過Property Key映射到的文本 (繁體)
