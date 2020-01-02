@@ -33,20 +33,20 @@ class I18nModule {
   const I18nModule(this.context, this.namespace, this.module);
 
   /// Parse and return the localized text for the specified [text].
-  /// If [lang] is specified, it will return the text which is associated with [lang].
-  String lang(String text, {dynamic args, String annotation, lang}) {
+  /// If [locale] is specified, it will return the text which is associated with [locale].
+  String lang(String text, {dynamic args, String annotation, locale}) {
     final I18nMessages messages = this.context?.resource?.get(this.namespace, this.module) ?? I18nMessages.empty;
     final I18nMessage message = messages.get(text, annotation: annotation);
 
     List<String> localeCodes = [];
 
     if (messages != I18nMessages.empty) {
-      if (lang is Locale) {
-        localeCodes = parseLocalCodes(lang);
+      if (locale is Locale) {
+        localeCodes = parseLocalCodes(locale);
       } else {
-        final Locale locale = strToLocale(lang?.toString());
+        final Locale localeObj = strToLocale(locale?.toString());
 
-        localeCodes = parseLocalCodes(locale ?? this.context.locale);
+        localeCodes = parseLocalCodes(localeObj ?? this.context.locale);
       }
     }
 
