@@ -35,16 +35,19 @@ class I18n {
         this._module = module,
         this._namespace = namespace;
 
+  /// Get the [I18nModuleContext] which is bound to the current [BuildContext],
+  /// then build and return [I18nModule] for the [I18n] instance.
   I18nModule of(BuildContext context) {
-    I18nModuleContext moduleContext;
-
-    if (context == null || (moduleContext = Localizations.of<I18nModuleContext>(context, I18nModuleContext)) == null) {
-      moduleContext = I18nModuleContext.noop;
-    }
-
-    return moduleContext.module(package: this._package, namespace: this._namespace, module: this._module);
+    return _getModuleContext(context).module(package: this._package, namespace: this._namespace, module: this._module);
   }
 
+  /// Get the [Locale] which is related to the current [BuildContext].
+  Locale locale(BuildContext context) {
+    return _getModuleContext(context).locale;
+  }
+
+  /// Build an [I18n] instance for the specified [module] which is in the [namespace]
+  /// and maybe is a flutter library named as [package].
   static I18n build({String package, String namespace, dynamic module}) {
     final name = module == null || module is String ? module : module.toString();
 
@@ -69,6 +72,16 @@ class I18n {
         parse: loader.parse,
       ),
     );
+  }
+
+  I18nModuleContext _getModuleContext(BuildContext context) {
+    I18nModuleContext moduleContext;
+
+    if (context == null || (moduleContext = Localizations.of<I18nModuleContext>(context, I18nModuleContext)) == null) {
+      moduleContext = I18nModuleContext.noop;
+    }
+
+    return moduleContext;
   }
 }
 
