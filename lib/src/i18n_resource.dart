@@ -58,19 +58,25 @@ class I18nCombinedResource extends I18nResource {
   /// Return [null] when no matched module was associated.
   @override
   I18nMessages get(String namespace, String module) {
+    I18nMessages ret;
+
     for (I18nResource resource in this._resources) {
       if (resource == null) {
         continue;
       }
 
-      I18nMessages messages = resource.get(namespace, module);
+      final I18nMessages messages = resource.get(namespace, module);
+      if (messages is _I18nErrorOccurredMessages) {
+        ret = messages;
+        continue;
+      }
 
       if (messages != null) {
         return messages;
       }
     }
 
-    return null;
+    return ret;
   }
 }
 

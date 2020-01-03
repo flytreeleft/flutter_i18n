@@ -21,4 +21,3 @@ const default_module = '_';
 
 const default_base_path = 'assets/i18n';
 const default_manifest_path = 'AssetManifest.json';
-const default_package_probe_path = '.i18n.manifest.yaml';

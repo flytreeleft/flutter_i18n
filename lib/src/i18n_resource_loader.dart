@@ -21,6 +21,7 @@ import 'package:flutter/services.dart';
 
 import 'package:http/http.dart' as http;
 
+import './i18n_const.dart';
 import './i18n_utils.dart';
 import './i18n_message.dart';
 import './i18n_resource.dart';
@@ -30,6 +31,8 @@ final RegExp _regexUrlMatch = RegExp(r'^http(s)?://[^/\\]+');
 final RegExp _regexHeadingOrTrailingSlashMatch = RegExp(r'^/+|/+$');
 final RegExp _regexFileSuffixMatch = RegExp(r'\.[^.]+$');
 final RegExp _regexDefaultPathEndingMatch = RegExp(r'/default$');
+final RegExp _regexPackageNameInPathMatch = RegExp(r'^packages/([^/]+)/.+');
+final RegExp _regexI18nYamlContentMatch = RegExp(r'^i18n:');
 
 typedef LoadFn = Future<Map<String, String>> Function(Locale locale, String basePath, String manifestPath);
 typedef ParseFn = I18nResource Function(Locale locale, Map<String, String> resourceFiles);
@@ -131,12 +134,12 @@ class I18nNormalResourceLoader extends I18nUserDefinedResourceLoader {
 
 /// The [I18nResourceLoader] for loading the i18n messages from the libraries' resources.
 class I18nPackageResourceLoader extends I18nUserDefinedResourceLoader {
-  I18nPackageResourceLoader({bool cacheable, bool showError, String probePath})
+  I18nPackageResourceLoader({bool cacheable, bool showError})
       : super(
           I18nResourceLoaderSpec(
             cacheable: cacheable,
             showError: showError,
-            load: (Locale locale, String basePath, String manifestPath) => _loadPackageResourceFiles(locale, probePath),
+            load: (Locale locale, String basePath, String manifestPath) => _loadPackageResourceFiles(locale),
           ),
         );
 }
@@ -159,22 +162,13 @@ Future<Map<String, String>> _loadLocalOrRemoteResourceFiles(Locale locale, Strin
 /// The [LoadFn] for loading the i18n messages from the app's local resources.
 Future<Map<String, String>> _loadLocalResourceFiles(Locale locale, String basePath, String manifestPath) async {
   // https://stackoverflow.com/questions/56544200/flutter-how-to-get-a-list-of-names-of-all-images-in-assets-directory#answer-56555070
-  // {..., {"assets/i18n/default.yaml":["assets/i18n/default.yaml"],"assets/i18n/page.yaml":["assets/i18n/page.yaml"]}
-  final manifestContent = await rootBundle.loadString(manifestPath);
-  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-  final List<String> resourcePaths = manifestMap.keys
-      .where((String key) => key.startsWith(basePath + '/') && (key.endsWith('.yaml') || key.endsWith('.yml')))
-      .toList();
+  // {..., "assets/i18n/default.yaml":["assets/i18n/default.yaml"], "assets/i18n/page.yaml":["assets/i18n/page.yaml"]}
+  final List<String> resourcePaths = await _getResourcesIn(basePath);
 
   final Map<String, String> resources = {};
 
   for (String resourcePath in resourcePaths) {
-    // Remove '/default' from subdirectory path
-    final String namespace = resourcePath
-        .substring(basePath.length + 1)
-        .replaceAll(_regexFileSuffixMatch, '')
-        .replaceAll(_regexDefaultPathEndingMatch, '');
+    final String namespace = _determineResourceNamespace(basePath, resourcePath);
 
     final String yaml = await rootBundle.loadString(resourcePath);
 
@@ -207,8 +201,60 @@ Future<Map<String, String>> _loadRemoteResourceFiles(Locale locale, String baseP
 }
 
 /// The [LoadFn] for loading the i18n messages from the libraries' resources.
-Future<Map<String, String>> _loadPackageResourceFiles(Locale locale, String probePath) async {
-  // TODO Ignore basePath and manifestPath
-  // TODO Add 'packages/xxx/' as namespace's prefix
-  return {};
+Future<Map<String, String>> _loadPackageResourceFiles(Locale locale) async {
+  // {..., "packages/flutter_i18n/assets/i18n/default.yaml":["packages/flutter_i18n/assets/i18n/default.yaml"]}
+  final List<String> resourcePaths = await _getResourcesIn('packages');
+
+  final Map<String, String> resourceContentMap = {};
+  final Map<String, List<String>> packageResourcePathsMap = {};
+
+  for (String resourcePath in resourcePaths) {
+    final String yaml = await rootBundle.loadString(resourcePath);
+    if (!_regexI18nYamlContentMatch.hasMatch(yaml)) {
+      continue;
+    }
+
+    final String packageName = _regexPackageNameInPathMatch.firstMatch(resourcePath).group(1);
+
+    resourceContentMap[resourcePath] = yaml;
+    packageResourcePathsMap.putIfAbsent(packageName, () => []).add(resourcePath);
+  }
+
+  final Map<String, String> resources = {};
+
+  for (String packageName in packageResourcePathsMap.keys) {
+    final List<String> packageResourcePaths = packageResourcePathsMap[packageName];
+    final String packageResourceBasePath =
+        packageResourcePaths.first.substring(0, packageResourcePaths.first.lastIndexOf('/'));
+
+    for (String packageResourcePath in packageResourcePaths) {
+      final String namespace =
+          'packages/$packageName/' + _determineResourceNamespace(packageResourceBasePath, packageResourcePath);
+
+      resources[namespace] = resourceContentMap[packageResourcePath];
+    }
+  }
+
+  return resources;
+}
+
+Future<List<String>> _getResourcesIn(String basePath) async {
+  final String manifestContent = await rootBundle.loadString(default_manifest_path);
+  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+  final List<String> resourcePaths = manifestMap.keys
+      .where((String key) => key.startsWith('$basePath/') && (key.endsWith('.yaml') || key.endsWith('.yml')))
+      .toList();
+
+  resourcePaths.sort((r1, r2) => r1.split('/').length - r2.split('/').length);
+
+  return resourcePaths;
+}
+
+String _determineResourceNamespace(String basePath, String resourcePath) {
+  // Remove '/default' from subdirectory path
+  return resourcePath
+      .substring(basePath.length + 1)
+      .replaceAll(_regexFileSuffixMatch, '')
+      .replaceAll(_regexDefaultPathEndingMatch, '');
 }
