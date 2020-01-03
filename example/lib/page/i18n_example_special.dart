@@ -133,7 +133,7 @@ final I18n _i18n = I18n.build(
               '''
 • final I18n i18n = I18n.build(package: 'flutter_i18n');
   i18n.of(context).lang(
-    'This is for you',
+    'To my dear friend',
   )''',
               style: TextStyle(color: Colors.green, fontStyle: FontStyle.italic),
             ),
@@ -143,7 +143,7 @@ final I18n _i18n = I18n.build(
                 const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 14)),
                 Flexible(
                   child: Text(
-                    getPackageLocaleText(context, 'flutter_i18n', 'This is for you'),
+                    getPackageLocaleText(context, 'flutter_i18n', 'To my dear friend'),
                     style: const TextStyle(color: Colors.blue, fontSize: 12),
                   ),
                 ),
