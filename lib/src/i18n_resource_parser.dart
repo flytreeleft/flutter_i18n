@@ -68,7 +68,9 @@ class I18nResourceParser {
     for (int i = 0; i < nodes.length; i++) {
       final childNode = nodes[i];
 
-      if (!(childNode is Map)) {
+      if (childNode == null) {
+        continue;
+      } else if (!(childNode is Map)) {
         throw 'The node "${toMapPath(namespace, [i])}" should be a map, but got "${childNode.runtimeType}"';
       }
 
@@ -120,5 +122,5 @@ class I18nResourceParser {
 }
 
 String toMapPath(String namespace, List<dynamic> sub) {
-  return namespace + (sub ?? []).join('.');
+  return namespace + '.' + (sub ?? []).join('.');
 }
