@@ -58,14 +58,14 @@ final I18n _i18n = I18n.build(
             Row(
               children: <Widget>[
                 // https://coolsymbol.com/
-                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 14)),
                 Flexible(
                   child: Text(
                     _i18n.of(context).lang(
                           'This an english text, but it will be translated to Chinese',
                           locale: 'zh_Hans',
                         ),
-                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                    style: const TextStyle(color: Colors.blue, fontSize: 12),
                   ),
                 ),
               ],
@@ -86,11 +86,11 @@ final I18n _i18n = I18n.build(
             Row(
               children: <Widget>[
                 // https://coolsymbol.com/
-                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 14)),
                 Flexible(
                   child: Text(
                     _i18n.of(context).lang('this.is.a.text.with.property.key'),
-                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                    style: const TextStyle(color: Colors.blue, fontSize: 12),
                   ),
                 ),
               ],
@@ -111,11 +111,11 @@ final I18n _i18n = I18n.build(
             Row(
               children: <Widget>[
                 // https://coolsymbol.com/
-                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 14)),
                 Flexible(
                   child: Text(
                     _i18n.of(null).lang('This is a text in a null BuildContext'),
-                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                    style: const TextStyle(color: Colors.blue, fontSize: 12),
                   ),
                 ),
               ],
@@ -140,11 +140,11 @@ final I18n _i18n = I18n.build(
             Row(
               children: <Widget>[
                 // https://coolsymbol.com/
-                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 20)),
+                const Text('⤷    ', style: TextStyle(color: Colors.amber, fontSize: 14)),
                 Flexible(
                   child: Text(
                     getPackageLocaleText(context, 'flutter_i18n', 'This is for you'),
-                    style: const TextStyle(color: Colors.blue, fontSize: 18),
+                    style: const TextStyle(color: Colors.blue, fontSize: 12),
                   ),
                 ),
               ],
