@@ -26,7 +26,7 @@ A simple and powerful Flutter i18n plugin.
 - Use [reflected_mustache](https://github.com/MikeMitterer/reflected_mustache)
   as the i18n message template engine, so the i18n message can be controlled freely.
 - Support to load the remote i18n message resources.
-- [**WIP**] Support to be used in the Flutter libraries.
+- Support to be used in the Flutter libraries.
 - Dynamic change language when needed, e.g.
   `i18n.lang('This an english text, but it will be translated to Chinese', lang: 'zh_Hans')`.
 - Support to custom the way to load or parse your i18n message resources.
