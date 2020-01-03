@@ -54,7 +54,8 @@ class I18n {
     return I18n(package: package, namespace: namespace, module: name);
   }
 
-  static _I18nDelegate delegate({
+  /// Create [LocalizationsDelegate] instance which will load i18n messages and build the [I18nModuleContext].
+  static LocalizationsDelegate<I18nModuleContext> delegate({
     String basePath,
     String manifestPath,
     I18nResourceLoaderSpec loader,
@@ -88,17 +89,17 @@ class I18n {
 class _I18nDelegate extends LocalizationsDelegate<I18nModuleContext> {
   final String _basePath;
   final String _manifestPath;
-  final I18nResourceLoader _normalResourceLoader;
 
-  final I18nPackageResourceLoader _packageResourceLoader = I18nPackageResourceLoader(
-    cacheable: _default_loader.cacheable,
-    showError: _default_loader.showError,
-    probePath: default_package_probe_path,
-  );
+  final I18nResourceLoader _normalResourceLoader;
+  final I18nPackageResourceLoader _packageResourceLoader;
 
   _I18nDelegate(String basePath, String manifestPath, I18nResourceLoaderSpec loader)
       : this._basePath = basePath,
         this._manifestPath = manifestPath,
+        this._packageResourceLoader = I18nPackageResourceLoader(
+          cacheable: loader.cacheable,
+          showError: loader.showError,
+        ),
         this._normalResourceLoader = loader.load != null
             ? I18nUserDefinedResourceLoader(loader)
             : I18nNormalResourceLoader(cacheable: loader.cacheable, showError: loader.showError);
