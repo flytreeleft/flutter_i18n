@@ -69,14 +69,14 @@ abstract class I18nResourceLoader {
 
     // Note: Only cache the resource when the resource files are loaded successfully
     return loadResourceFiles(locale, root, manifest).then((files) {
-      I18nResource resource = parseResourceFiles(locale, files ?? {});
+      final I18nResource resource = parseResourceFiles(locale, files ?? {});
 
       if (this.cacheable) {
         _resourceCache[resourceKey] = resource;
       }
 
       return resource;
-    }).catchError((e) => this.showError ? I18nErrorOccurredResource(e.toString()) : null);
+    }).catchError((e) => this.showError ? I18nErrorOccurredResource(null, e.toString()) : null);
   }
 
   Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath);
@@ -86,14 +86,27 @@ abstract class I18nResourceLoader {
 
     // Mapping: <'namespace/module', I18nMessage>
     final Map<String, I18nMessages> messagesMap = {};
+    final List<I18nResource> errorOccurredResources = [];
 
     for (String namespace in resourceFiles.keys) {
-      String yaml = resourceFiles[namespace];
+      final String yaml = resourceFiles[namespace];
 
-      messagesMap.addAll(parser.parse(namespace, yaml));
+      try {
+        messagesMap.addAll(parser.parse(namespace, yaml));
+      } catch (e) {
+        if (this.showError) {
+          errorOccurredResources.add(I18nErrorOccurredResource(namespace, e.toString()));
+        }
+        //print(e);
+      }
     }
 
-    return I18nResource(messagesMap);
+    I18nResource resource = I18nResource(messagesMap);
+    if (errorOccurredResources.isEmpty) {
+      return resource;
+    } else {
+      return I18nCombinedResource([resource, ...errorOccurredResources]);
+    }
   }
 }
 

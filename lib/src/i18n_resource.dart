@@ -35,15 +35,19 @@ class I18nResource {
 }
 
 /// A [I18nResource] which occurs some error.
-/// It will always return the [_error] content when calling [I18nMessage].parse().
+/// It will always return the [error] content when calling [I18nMessage].parse().
 class I18nErrorOccurredResource extends I18nResource {
+  final String _namespace;
   final String _error;
 
-  I18nErrorOccurredResource(this._error) : super(null);
+  I18nErrorOccurredResource(this._namespace, this._error) : super(null);
 
   @override
   I18nMessages get(String namespace, String module) {
-    return _I18nErrorOccurredMessages(this._error);
+    if (this._namespace == null || namespace == this._namespace || namespace.startsWith(this._namespace + '/')) {
+      return _I18nErrorOccurredMessages(this._error);
+    }
+    return null;
   }
 }
 
@@ -67,7 +71,10 @@ class I18nCombinedResource extends I18nResource {
 
       final I18nMessages messages = resource.get(namespace, module);
       if (messages is _I18nErrorOccurredMessages) {
-        ret = messages;
+        // Just match the first error occurred messages.
+        if (ret == null) {
+          ret = messages;
+        }
         continue;
       }
 
