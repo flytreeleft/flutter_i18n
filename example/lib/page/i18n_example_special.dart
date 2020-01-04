@@ -132,9 +132,7 @@ final I18n _i18n = I18n.build(
             const Text(
               '''
 • final I18n i18n = I18n.build(package: 'flutter_i18n');
-  i18n.of(context).lang(
-    'To my dear friend',
-  )''',
+  i18n.of(context).lang('To my dear friend')''',
               style: TextStyle(color: Colors.green, fontStyle: FontStyle.italic),
             ),
             Row(
