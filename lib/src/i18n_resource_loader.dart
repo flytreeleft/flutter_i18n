@@ -35,7 +35,7 @@ final RegExp _regexPackageNameInPathMatch = RegExp(r'^packages/([^/]+)/.+');
 final RegExp _regexI18nYamlContentMatch = RegExp(r'^i18n:');
 
 typedef LoadFn = Future<Map<String, String>> Function(Locale locale, String basePath, String manifestPath);
-typedef ParseFn = I18nResource Function(Locale locale, Map<String, String> resourceFiles);
+typedef ParseFn = Map<String, I18nMessages> Function(Locale locale, String namespace, String content);
 
 class I18nResourceLoaderSpec {
   final bool cacheable;
@@ -67,9 +67,9 @@ abstract class I18nResourceLoader {
       return Future.sync(() => _resourceCache[resourceKey]);
     }
 
-    // Note: Only cache the resource when the resource files are loaded successfully
-    return loadResourceFiles(locale, root, manifest).then((files) {
-      final I18nResource resource = parseResourceFiles(locale, files ?? {});
+    // Note: Only cache the resource when the resources are loaded successfully
+    return loadResources(locale, root, manifest).then((resources) {
+      final I18nResource resource = parseResources(locale, resources ?? {});
 
       if (this.cacheable) {
         _resourceCache[resourceKey] = resource;
@@ -79,20 +79,18 @@ abstract class I18nResourceLoader {
     }).catchError((e) => this.showError ? I18nErrorOccurredResource(null, e.toString()) : null);
   }
 
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath);
+  Future<Map<String, String>> loadResources(Locale locale, String basePath, String manifestPath);
 
-  I18nResource parseResourceFiles(Locale locale, Map<String, String> resourceFiles) {
-    final I18nResourceParser parser = I18nResourceParser(locale);
-
+  I18nResource parseResources(Locale locale, Map<String, String> resources) {
     // Mapping: <'namespace/module', I18nMessage>
     final Map<String, I18nMessages> messagesMap = {};
     final List<I18nResource> errorOccurredResources = [];
 
-    for (String namespace in resourceFiles.keys) {
-      final String yaml = resourceFiles[namespace];
+    for (String namespace in resources.keys) {
+      final String content = resources[namespace];
 
       try {
-        messagesMap.addAll(parser.parse(namespace, yaml));
+        messagesMap.addAll(parseResource(locale, namespace, content));
       } catch (e) {
         if (this.showError) {
           errorOccurredResources.add(I18nErrorOccurredResource(namespace, e.toString()));
@@ -108,6 +106,12 @@ abstract class I18nResourceLoader {
       return I18nCombinedResource([resource, ...errorOccurredResources]);
     }
   }
+
+  Map<String, I18nMessages> parseResource(Locale locale, String namespace, String content) {
+    final I18nResourceParser parser = I18nResourceParser(locale);
+
+    return parser.parse(namespace, content);
+  }
 }
 
 /// The user defined [I18nResourceLoader] to support to load i18n messages via [loader].load().
@@ -119,16 +123,17 @@ class I18nUserDefinedResourceLoader extends I18nResourceLoader {
         super(cacheable: loader.cacheable, showError: loader.showError);
 
   @override
-  Future<Map<String, String>> loadResourceFiles(Locale locale, String basePath, String manifestPath) {
+  Future<Map<String, String>> loadResources(Locale locale, String basePath, String manifestPath) {
     return this.loader.load(locale, basePath, manifestPath);
   }
 
   @override
-  I18nResource parseResourceFiles(Locale locale, Map<String, String> resourceFiles) {
+  Map<String, I18nMessages> parseResource(Locale locale, String namespace, String content) {
     if (this.loader.parse == null) {
-      return super.parseResourceFiles(locale, resourceFiles);
+      return super.parseResource(locale, namespace, content);
     }
-    return this.loader.parse(locale, resourceFiles);
+
+    return this.loader.parse(locale, namespace, content);
   }
 }
 
