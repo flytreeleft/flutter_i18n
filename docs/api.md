@@ -5,6 +5,8 @@ API Document
 
 ### `static LocalizationsDelegate<I18nModuleContext> delegate({...})`
 
+Create the `LocalizationsDelegate` for the app. The following is the full method signature:
+
 ```dart
 static LocalizationsDelegate<I18nModuleContext> delegate({
   String basePath,
@@ -13,8 +15,6 @@ static LocalizationsDelegate<I18nModuleContext> delegate({
   bool debug: false,
 });
 ```
-
-Create the `LocalizationsDelegate` for the app.
 
 - `basePath`: [String] The base directory to put the i18n message resources.
   If you want to load resources from the local, the `basePath` should be
@@ -25,34 +25,83 @@ Create the `LocalizationsDelegate` for the app.
   the i18n message resource paths. Default is `AssetManifest.json`.
   For the remote resources, the manifest's content should be an array json string
   which contains resource paths, e.g. `['a/b.yaml', 'c/d.yml', ...]`.
-- `loader`: [I18nResourceLoaderSpec] .
+- `loader`: [I18nResourceLoaderSpec] The custom i18n resource loader and parser,
+  and to specify if enable cache and error-shown.
+  e.g. `loader: I18nResourceLoaderSpec(cacheable: false, showError: true)`.
+- `debug`: [bool] Enable debug mode or not. If it's `true`, the cache will be disabled
+  and the error will be shown. Default is `false`.
+
+The returned `LocalizationsDelegate<I18nModuleContext>` will async load the specified resources
+which were declared in `manifestPath` from the `basePath`, then create `I18nModuleContext`
+to build the i18n context for modules.
+
+Usually, you only need to call `I18n.delegate({...})` in the root widget as the following code:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    localizationsDelegates: [
+      I18n.delegate(debug: true),
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+    ],
+  );
+}
+```
+
+But, if you want to load other i18n message resources at runtime, you can call it like this:
+
+```dart
+Future<String> _fetchRemoteLocale(Locale locale, String text) async {
+  return await I18n.delegate(
+    basePath: 'https://raw.githubusercontent.com/flytreeleft/flutter_i18n/master/example/assets/i18n',
+    manifestPath: 'example/remote/i18n.json',
+    loader: const I18nResourceLoaderSpec(cacheable: false, showError: true),
+  ).load(locale).then((ctx) => ctx.module(namespace: 'example/remote').lang(text));
+}
+```
 
 ### `static I18n build({String package, String namespace, dynamic module})`
 
-Create a `I18n` instance to load and translate the messages which are defined in
-`${basePath}/${namespace}/default.yaml` or `${basePath}/${namespace}.yaml` for the `module`.
-
 - `package`: [String] The package name of a Flutter library. If you want to use `flutter_i18n`
-  in your Flutter library project, you need to specify the `package` as your library name.
-  **Note**: if your library is in debug, the `I18n` will load the i18n messages from the `basePath`,
-  if your library is imported by other project, it will load i18n messages from
-  `packages/<library_name>/${basePath}`.
-- `namespace`: [String] The YAML filepath where the i18n messages are defined in.
-  Default is `default` which means the i18n messages are defined in the `${basePath}/default.yaml`.
-- `module`: [String] A module name or a class name to distinguish the i18n messages
-  between the different widgets. Default is `_` (a underline which represents the default module).
+  in your Flutter library project, you need to specify the `package` as the library name
+  in all modules. **Note**: If your library is in development, the `I18n` will load the i18n
+  messages from the [Flutter assets](https://flutter.dev/docs/development/ui/assets-and-images),
+  if your library is imported by other project, the i18n messages will be loaded from
+  `packages/<library_name>/`, the `I18n` will automatically load all `*.yaml` or `*.yml` files
+  which contain the top node `i18n:`.
+- `namespace`: [String] The namespace of `module`. The filepath which is relative with `basePath`
+  will be used as the part of `namespace` (excluding the suffix). If the file is named as
+  `default.yaml` or `default.yml`, the namespace should omit the `default`, e.g. assumes that
+  the i18n messages defined in `example/advance/default.yaml`, so the `namespace` will be started
+  with `example/advance`, and if all i18n messages are stored in `${basePath}/default.yaml`,
+  the parameter `namespace` can be ignored. **Note**: If in the YAML file, the `module` is the child
+  of other node, the `namespace` should contains the parent node names and separates them with `/`
+  from top to bottom.
+- `module`: [String] A module name to organize the i18n messages. The `module` can be
+  a string or a class. Usually, we regard a widget as a module, so `module` represents
+  the widget class. Default is `_`, a underline which represents the default module.
+  The default module in a `namespace` will be defined at the first location in the YAML file.
+
+To build a `I18n` instance (named as `_i18n`) for the current module, so that you can do
+i18n translation with the inner variable `_i18n`, e.g. `_i18n.of(context).lang('Hello world!')`.
 
 For example, if you want to use `I18n` in the widget `Calculator` for the library
-[flutter_calculator](https://github.com/flytreeleft/flutter_calculator)
-and define its i18n messages in `assets/i18n/main/calculator.yaml`, you need to create `I18n` like:
+[flutter_calculator](https://github.com/flytreeleft/flutter_calculator) and its i18n messages were
+defined in `assets/i18n/calculator.yaml` (which will be packaged in `packages/flutter_calculator/`),
+you need to build `I18n` in the module `calculator.dart` like the following code:
 
 ```dart
 final I18n _i18n = I18n.build(
   package: 'flutter_calculator',
+  namespace: 'calculator',
   module: Calculator,
-  namespace: 'main/calculator',
 );
 ```
+
+**Note**: The parameter `package` is just used in a Flutter library, for other Flutter project,
+it should be omitted.
 
 ### `I18nModule of(BuildContext context)`
 
