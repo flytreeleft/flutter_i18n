@@ -16,19 +16,19 @@ static LocalizationsDelegate<I18nModuleContext> delegate({
 });
 ```
 
-- `basePath`: [String] The base directory to put the i18n message resources.
+- `basePath`: **[String]** The base directory to put the i18n message resources.
   If you want to load resources from the local, the `basePath` should be
   the root of the i18n message [assets](https://flutter.dev/docs/development/ui/assets-and-images),
   if your i18n message resources should be loaded from the remote host,
   just set `basePath` as a URL link address. Default is `assets/i18n` which is a local assets path.
-- `manifestPath`: [String] The path of manifest which specifies all of
+- `manifestPath`: **[String]** The path of manifest which specifies all of
   the i18n message resource paths. Default is `AssetManifest.json`.
   For the remote resources, the manifest's content should be an array json string
   which contains resource paths, e.g. `['a/b.yaml', 'c/d.yml', ...]`.
-- `loader`: [I18nResourceLoaderSpec] The custom i18n resource loader and parser,
+- `loader`: **[I18nResourceLoaderSpec]** The custom i18n resource loader and parser,
   and to specify if enable cache and error-shown.
   e.g. `loader: I18nResourceLoaderSpec(cacheable: false, showError: true)`.
-- `debug`: [bool] Enable debug mode or not. If it's `true`, the cache will be disabled
+- `debug`: **[bool]** Enable debug mode or not. If it's `true`, the cache will be disabled
   and the error will be shown. Default is `false`.
 
 The returned `LocalizationsDelegate<I18nModuleContext>` will async load the specified resources
@@ -64,14 +64,17 @@ Future<String> _fetchRemoteLocale(Locale locale, String text) async {
 
 ### `static I18n build({String package, String namespace, dynamic module})`
 
-- `package`: [String] The package name of a Flutter library. If you want to use `flutter_i18n`
+To build a `I18n` instance (named as `_i18n`) for the current module, so that you can do
+i18n translation with the inner variable `_i18n`, e.g. `_i18n.of(context).lang('Hello world!')`.
+
+- `package`: **[String]** The package name of a Flutter library. If you want to use `flutter_i18n`
   in your Flutter library project, you need to specify the `package` as the library name
   in all modules. **Note**: If your library is in development, the `I18n` will load the i18n
   messages from the [Flutter assets](https://flutter.dev/docs/development/ui/assets-and-images),
   if your library is imported by other project, the i18n messages will be loaded from
   `packages/<library_name>/`, the `I18n` will automatically load all `*.yaml` or `*.yml` files
   which contain the top node `i18n:`.
-- `namespace`: [String] The namespace of `module`. The filepath which is relative with `basePath`
+- `namespace`: **[String]** The namespace of `module`. The filepath which is relative with `basePath`
   will be used as the part of `namespace` (excluding the suffix). If the file is named as
   `default.yaml` or `default.yml`, the namespace should omit the `default`, e.g. assumes that
   the i18n messages defined in `example/advance/default.yaml`, so the `namespace` will be started
@@ -79,15 +82,12 @@ Future<String> _fetchRemoteLocale(Locale locale, String text) async {
   the parameter `namespace` can be ignored. **Note**: If in the YAML file, the `module` is the child
   of other node, the `namespace` should contains the parent node names and separates them with `/`
   from top to bottom.
-- `module`: [String] A module name to organize the i18n messages. The `module` can be
+- `module`: **[String]** A module name to organize the i18n messages. The `module` can be
   a string or a class. Usually, we regard a widget as a module, so `module` represents
   the widget class. Default is `_`, a underline which represents the default module.
   The default module in a `namespace` will be defined at the first location in the YAML file.
 
-To build a `I18n` instance (named as `_i18n`) for the current module, so that you can do
-i18n translation with the inner variable `_i18n`, e.g. `_i18n.of(context).lang('Hello world!')`.
-
-For example, if you want to use `I18n` in the widget `Calculator` for the library
+Give you an example. If you want to use `I18n` in the widget `Calculator` for the library
 [flutter_calculator](https://github.com/flytreeleft/flutter_calculator) and its i18n messages were
 defined in `assets/i18n/calculator.yaml` (which will be packaged in `packages/flutter_calculator/`),
 you need to build `I18n` in the module `calculator.dart` like the following code:
@@ -105,7 +105,35 @@ it should be omitted.
 
 ### `I18nModule of(BuildContext context)`
 
+Get the `I18nModuleContext` which is bound to the current `BuildContext`, then build and return
+`I18nModule` instance for the current module.
+
+After you get the `I18nModule` instance, you can do translation where the text will be shown in:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Column(
+    children: <Widget>[
+      Flexible(
+        child: Text(
+          _i18n.of(context).lang('This is a text which will translated for different locale.'),
+        ),
+      ),
+    ],
+  );
+}
+```
+
+**Note**: Usually, the i18n messages will be cached, and `I18nModule` just provide a method to
+get these messages based on the current locale, so you do not need to worry about your memory
+or the performance.
+
 ### `Locale locale(BuildContext context)`
+
+Get the locale which is related to the current `BuildContext`.
+
+It will return `null` if `I18n.delegate(...)` isn't called which represents the system locale.
 
 ## I18nModuleContext
 
@@ -121,12 +149,12 @@ Load `I18n` instance from `BuildContext` and translate the `text`:
 String msg = _i18n.of(context).lang('This is a text');
 ```
 
-- `text`: [String] The i18n message content, if no specified translated message, `#lang(...)`
+- `text`: **[String]** The i18n message content, if no specified translated message, `#lang(...)`
   will return the `text` self.
-- `args`: [List|Map|Object] The data which will be injected to the message template
+- `args`: **[List|Map|Object]** The data which will be injected to the message template
   (using [mustache](https://mustache.github.io)).
-- `lang`: [String|Locale] The language which the text will be translated to. If not specified this,
-  the `text` will be translated to the app's locale language.
+- `locale`: **[String|Locale]** The locale code or object which the text will be translated to.
+  If not specified this, the `text` will be translated to the app's locale language.
 
 ## I18nResourceLoaderSpec
 
