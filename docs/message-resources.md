@@ -1,0 +1,6 @@
+Message Resources
+==================================================
+
+## Resources
+
+## Messages
