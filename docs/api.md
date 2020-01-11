@@ -133,30 +133,70 @@ or the performance.
 
 Get the locale which is related to the current `BuildContext`.
 
-It will return `null` if `I18n.delegate(...)` isn't called which represents the system locale.
+It will return `null` if `I18n.delegate(...)` isn't called, the `null` represents the system locale.
 
 ## I18nModuleContext
 
 ### `I18nModule module({String package, String namespace, String module})`
 
+Build a [I18nModule](#I18nModule) instance for the specified `module` which is unified with `namespace`
+in the `package` library.
+
+Usually, the `I18nModule` instance should be created via calling `_i18n.of(context)`.
+But, you should call it when you use `I18n.delegate(...).load(locale)` directly:
+
+```dart
+Future<String> _fetchRemoteLocale(Locale locale, String text) async {
+  return await I18n.delegate(
+    basePath: 'https://raw.githubusercontent.com/flytreeleft/flutter_i18n/master/example/assets/i18n',
+    manifestPath: 'example/remote/i18n.json',
+    loader: const I18nResourceLoaderSpec(cacheable: false, showError: true),
+  )
+  .load(locale)
+  .then((I18nModuleContext ctx) => ctx.module(namespace: 'example/remote')
+  .lang(text));
+}
+```
+
 ## I18nModule
 
 ### `String lang(String text, {dynamic args, String annotation, locale})`
 
-Load `I18n` instance from `BuildContext` and translate the `text`:
+Translate the `text` to the current locale or the specified `locale`,
+and it will do [Mustache](https://mustache.github.io) template parsing when the `text`
+contains Mustache syntax.
+
+- `text`: **[String]** The i18n message text. If no specified translated message for the locale,
+  `#lang(...)` will just return the `text` self.
+- `args`: **[List|Map|Object]** The data which will be injected to
+  the [Mustache](https://mustache.github.io) template.
+- `locale`: **[String|Locale]** The locale code or object which the `text` will be translated to.
+  If not specified it, the `text` will be translated to the current locale.
+- `annotation`: **[String]** An annotation for distinguishing the same `text` which should
+  be translated to different locale content in one module.
+
+Here are some usage examples:
 
 ```dart
 String msg = _i18n.of(context).lang('This is a text');
+
+String msg = _i18n.of(context).lang(
+  'My name is {{ name.en }}.',
+  args: { 'name': {'en': 'Lily', 'zh': '莉莉'} },
+);
+
+String msg = _i18n.of(context).lang('This is a text', locale: 'zh_Hans');
+
+String msg = _i18n.of(context).lang('This is a text', annotation: 'another-meaning');
 ```
 
-- `text`: **[String]** The i18n message content, if no specified translated message, `#lang(...)`
-  will return the `text` self.
-- `args`: **[List|Map|Object]** The data which will be injected to the message template
-  (using [mustache](https://mustache.github.io)).
-- `locale`: **[String|Locale]** The locale code or object which the text will be translated to.
-  If not specified this, the `text` will be translated to the app's locale language.
-
 ## I18nResourceLoaderSpec
+
+A plain model for specify the user-defined i18n message resource loader and parser.
+
+You can define your loading and parsing way to meet your needs.
+
+The following is its declaration:
 
 ```dart
 typedef LoadFn = Future<Map<String, String>> Function(Locale locale, String basePath, String manifestPath);
@@ -170,3 +210,8 @@ class I18nResourceLoaderSpec {
   final ParseFn parse;
 }
 ```
+
+You can set `cacheable` to `false` to disable the i18n messages cache.
+
+Also you can set `showError` to `true` to the loading or parsing error,
+so that calling `I18nModule#lang(...)` will return the error always.
