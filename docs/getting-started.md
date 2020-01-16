@@ -26,7 +26,7 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 final I18n _i18n = I18n.build();
 ```
 
-## Do translation
+## Wrap Text with `.lang(...)`
 
 Use `_i18n` anywhere you can get `BuildContext` directly or indirectly to translate
 the specified text:
@@ -44,14 +44,16 @@ the specified text:
 
 ## Enable Localization
 
-All that you have to do is as above. You import `I18n` will have no any affects to your app.
+All that you have to do is as above. Using `I18n` will have no any affects to your app.
 It will just return the original text as you passed.
 
-But, if you want to make sure your app's text can be translated to different locale messages.
-you should specify our `LocalizationsDelegate` in your app's root widget (like `MaterialApp`):
+But, if you want to make sure your app's text can be translated to different locale message.
+You should specify `LocalizationsDelegate<I18nModuleContext>` (built via `I18n.delegate()`)
+in your app's root widget (e.g. `MaterialApp`):
 
 ```dart
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 
 // ...
   @override
@@ -65,7 +67,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
         const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
       ],
       localizationsDelegates: [
-        I18n.delegate(),
+        I18n.delegate(), // -> LocalizationsDelegate<I18nModuleContext>
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
@@ -77,9 +79,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 ## Prepare i18n messages
 
-Furthermore, you need to do translation for the text which is occurred in your app.
+Furthermore, you need to do translation for the text which is appeared in your app.
 
-First, an example, create some YAML files in your project's root directory,
+First, with an example, create a YAML file in your project's root directory,
 such as `assets/i18n/default.yaml` which means we put our message resources into
 the default `basePath` directory - `assets/i18n`, and organize the module messages
 in the `default` namespace.
@@ -98,7 +100,7 @@ flutter:
     #- assets/i18n/
 ```
 
-Now, you should put your translation to `assets/i18n/default.yaml` like:
+And, you should put your translations to `assets/i18n/default.yaml` like:
 
 ```yaml
 i18n:
@@ -112,7 +114,7 @@ i18n:
       zh_Hant: Flutter I18n功能演示 (中文繁體)
 ```
 
-Congratulations, the translation will be worked when your app is running in different locale.
+Congratulations, the translations will be worked when your app is running in different locale.
 
 ## Furthermore
 
