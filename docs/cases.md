@@ -31,7 +31,7 @@ final I18n _i18n = I18n.build();
     assert(_i18n.of(context).lang('This is a text') == '这是一段文本');
     // For Traditional Chinese locale
     assert(_i18n.of(context).lang('This is a text') == '這是一段文本');
-    
+
     return null;
   }
 // ...
@@ -108,7 +108,7 @@ final I18n _i18n = I18n.build(namespace: 'annotated');
     assert(_i18n.of(context).lang('This is a text', annotation: 'another') == '这是另一段文字');
     // For Traditional Chinese locale
     assert(_i18n.of(context).lang('This is a text', annotation: 'another') == '這是另一段文字');
-    
+
     return null;
   }
 // ...
@@ -170,7 +170,7 @@ Then do translation for the remote text like:
       },
     );
   }
-  
+
   Future<String> _fetchRemoteLocale(Locale locale, String text) async {
     return await I18n.delegate(
       basePath: 'https://i18n.example.com/assets/i18n/',
@@ -287,7 +287,7 @@ i18n:
                  来自，爱你的蛋！
 ```
 
-We can get the text as the following code:
+So you can get the complete translated text with the following code:
 
 ```dart
 // ...
